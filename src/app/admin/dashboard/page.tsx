@@ -92,17 +92,17 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent className="flex space-x-4">
                      <Button asChild>
-                        <Link href="/admin/crops/new">
+                        <Link href="/admin/crops">
                             <PlusCircle className="mr-2 h-4 w-4" /> Add New Crop
                         </Link>
                     </Button>
                     <Button asChild variant="secondary">
-                        <Link href="/admin/weather/new">
+                        <Link href="/admin/weather">
                             <PlusCircle className="mr-2 h-4 w-4" /> Add Weather Alert
                         </Link>
                     </Button>
                      <Button asChild variant="secondary">
-                        <Link href="/admin/tips/new">
+                        <Link href="/admin/tips">
                             <PlusCircle className="mr-2 h-4 w-4" /> Add Farming Tip
                         </Link>
                     </Button>
