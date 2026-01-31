@@ -20,13 +20,20 @@ export interface Crop {
 }
 
 export type WeatherAlert = {
-  id: string;
-  type: 'rain' | 'heatwave' | 'frost';
-  title: Translations;
-  message: Translations;
+    id: string;
+    thresholdRain: number;
+    thresholdTemperatureMin: number;
+    thresholdTemperatureMax: number;
+    frostRisk: boolean;
+    alertMessage: string;
+    recommendedActions: string;
+    isEnabled: boolean;
 };
 
-export type DailyTip = {
-  id: string;
-  tip: Translations;
+export type FarmingTip = {
+    id: string;
+    tipText: string;
+    language: string;
+    scheduledDate: string; // ISO string
+    isEnabled: boolean;
 };

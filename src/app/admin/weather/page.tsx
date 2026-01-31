@@ -1,0 +1,223 @@
+
+"use client";
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { PlusCircle, Edit, Trash2, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useCollection } from '@/firebase/firestore/use-collection';
+import { collection, doc } from 'firebase/firestore';
+import { useFirestore, useMemoFirebase } from '@/firebase/provider';
+import { setDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { Badge } from '@/components/ui/badge';
+
+const formSchema = z.object({
+  id: z.string().optional(),
+  alertMessage: z.string().min(1, 'Alert message is required'),
+  recommendedActions: z.string().min(1, 'Recommended actions are required'),
+  thresholdRain: z.coerce.number(),
+  thresholdTemperatureMin: z.coerce.number(),
+  thresholdTemperatureMax: z.coerce.number(),
+  frostRisk: z.boolean().default(false),
+  isEnabled: z.boolean().default(true),
+});
+
+type AlertFormValues = z.infer<typeof formSchema>;
+
+export default function AdminWeatherPage() {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedAlert, setSelectedAlert] = useState<any | null>(null);
+  const { toast } = useToast();
+  const firestore = useFirestore();
+
+  const alertsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'weatherAlerts'): null, [firestore]);
+  const { data: alerts, isLoading, error } = useCollection<any>(alertsCollectionRef);
+
+  const form = useForm<AlertFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      frostRisk: false,
+      isEnabled: true,
+      thresholdRain: 0,
+      thresholdTemperatureMin: 0,
+      thresholdTemperatureMax: 50,
+    },
+  });
+
+  const handleAddNew = () => {
+    setSelectedAlert(null);
+    form.reset({
+      alertMessage: '',
+      recommendedActions: '',
+      thresholdRain: 0,
+      thresholdTemperatureMin: 0,
+      thresholdTemperatureMax: 50,
+      frostRisk: false,
+      isEnabled: true,
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (alert: any) => {
+    setSelectedAlert(alert);
+    form.reset(alert);
+    setIsFormOpen(true);
+  };
+
+  const handleDelete = (alert: any) => {
+    setSelectedAlert(alert);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedAlert && firestore) {
+      const docRef = doc(firestore, 'weatherAlerts', selectedAlert.id);
+      deleteDocumentNonBlocking(docRef);
+      toast({ title: 'Alert Deleted', description: `The alert has been removed.`, variant: 'destructive' });
+    }
+    setIsDeleteDialogOpen(false);
+    setSelectedAlert(null);
+  };
+
+  const onSubmit = (values: AlertFormValues) => {
+    if (!firestore) return;
+    
+    if (selectedAlert) {
+      // Update
+      const docRef = doc(firestore, 'weatherAlerts', selectedAlert.id);
+      updateDocumentNonBlocking(docRef, values);
+      toast({ title: 'Alert Updated', description: 'The weather alert has been updated.' });
+    } else {
+      // Create
+      const newId = values.alertMessage.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 20);
+      const docRef = doc(firestore, 'weatherAlerts', newId);
+      setDocumentNonBlocking(docRef, {...values, id: newId}, { merge: false });
+      toast({ title: 'Alert Added', description: 'The new weather alert has been added.' });
+    }
+    setIsFormOpen(false);
+    form.reset();
+  };
+
+  return (
+    <>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Weather Alert Management</CardTitle>
+            <CardDescription>Manage weather-based rules and alerts.</CardDescription>
+          </div>
+          <Button onClick={handleAddNew}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add New Alert
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {isLoading && (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          )}
+          {error && (
+             <div className="text-red-500 p-4 border border-red-500 rounded-md">
+                <p><strong>Error:</strong> Failed to load alerts.</p>
+                <p className="text-sm">{error.message}</p>
+             </div>
+          )}
+          {!isLoading && !error && (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Alert Message</TableHead>
+                    <TableHead className="hidden md:table-cell">Condition</TableHead>
+                    <TableHead>Enabled</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {alerts?.map((alert) => (
+                    <TableRow key={alert.id}>
+                      <TableCell className="font-medium max-w-sm truncate">{alert.alertMessage}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {alert.frostRisk ? 'Frost' : `T°: ${alert.thresholdTemperatureMin}-${alert.thresholdTemperatureMax}°C, Rain: ${alert.thresholdRain}mm`}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={alert.isEnabled ? 'default' : 'secondary'}>
+                          {alert.isEnabled ? 'Yes' : 'No'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" size="icon" onClick={() => handleEdit(alert)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="destructive" size="icon" onClick={() => handleDelete(alert)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{selectedAlert ? 'Edit Alert' : 'Add New Alert'}</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4">
+                <FormField control={form.control} name="alertMessage" render={({ field }) => (<FormItem><FormLabel>Alert Message</FormLabel><FormControl><Textarea placeholder="e.g., Heavy rainfall expected..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="recommendedActions" render={({ field }) => (<FormItem><FormLabel>Recommended Actions</FormLabel><FormControl><Textarea placeholder="e.g., Delay irrigation..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField control={form.control} name="thresholdRain" render={({ field }) => (<FormItem><FormLabel>Rain Threshold (mm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="thresholdTemperatureMin" render={({ field }) => (<FormItem><FormLabel>Min Temp (°C)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="thresholdTemperatureMax" render={({ field }) => (<FormItem><FormLabel>Max Temp (°C)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="frostRisk" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm"><FormLabel>Frost Risk</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
+                    <FormField control={form.control} name="isEnabled" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm"><FormLabel>Enabled</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
+                </div>
+              <DialogFooter className="pt-4 border-t">
+                <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}>Cancel</Button>
+                <Button type="submit">{selectedAlert ? 'Save Changes' : 'Create Alert'}</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the selected weather alert.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}

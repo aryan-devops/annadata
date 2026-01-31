@@ -10,11 +10,11 @@ import { Header } from './header';
 const adminNavItems = [
     { href: '/admin/dashboard', icon: <Tractor />, label: 'Dashboard' },
     { href: '/admin/crops', icon: <Wheat />, label: 'Crops' },
-    { href: '/admin/seasons', icon: <Thermometer />, label: 'Seasons' },
     { href: '/admin/weather', icon: <Droplets />, label: 'Weather Alerts' },
     { href: '/admin/tips', icon: <BookOpen />, label: 'Farming Tips' },
-    { href: '/admin/schemes', icon: <Shield />, label: 'Govt. Schemes' },
-    { href: '/admin/settings', icon: <Settings />, label: 'Settings' },
+    // { href: '/admin/seasons', icon: <Thermometer />, label: 'Seasons' },
+    // { href: '/admin/schemes', icon: <Shield />, label: 'Govt. Schemes' },
+    // { href: '/admin/settings', icon: <Settings />, label: 'Settings' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -44,7 +44,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         {adminNavItems.map(item => (
                             <SidebarMenuItem key={item.href}>
                                 <Link href={item.href} passHref>
-                                    <SidebarMenuButton isActive={pathname === item.href}>
+                                    <SidebarMenuButton isActive={pathname.startsWith(item.href)}>
                                         {item.icon}
                                         <span>{item.label}</span>
                                     </SidebarMenuButton>

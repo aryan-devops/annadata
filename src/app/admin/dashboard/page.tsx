@@ -3,11 +3,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Wheat, Droplets, BookOpen, Loader2 } from 'lucide-react';
+import { PlusCircle, Wheat, Droplets, BookOpen, Loader2, Database } from 'lucide-react';
 import { useCollection } from "@/firebase/firestore/use-collection";
 import { collection } from "firebase/firestore";
 import { useFirestore, useMemoFirebase } from "@/firebase/provider";
 import Link from "next/link";
+import { seedDatabase } from '@/firebase/seed';
+import { useToast } from "@/hooks/use-toast";
+
 
 function StatCard({ title, value, icon, isLoading }: { title: string, value: number | string, icon: React.ReactNode, isLoading?: boolean }) {
     return (
@@ -29,6 +32,8 @@ function StatCard({ title, value, icon, isLoading }: { title: string, value: num
 
 export default function AdminDashboard() {
     const firestore = useFirestore();
+    const { toast } = useToast();
+
     const cropsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'crops') : null, [firestore]);
     const weatherAlertsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'weatherAlerts') : null, [firestore]);
     const tipsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'farmingTips') : null, [firestore]);
@@ -37,12 +42,30 @@ export default function AdminDashboard() {
     const { data: alerts, isLoading: isLoadingAlerts } = useCollection(weatherAlertsCollectionRef);
     const { data: tips, isLoading: isLoadingTips } = useCollection(tipsCollectionRef);
 
+    const handleSeed = () => {
+        if (firestore) {
+            const result = seedDatabase(firestore);
+            if (result.success) {
+                toast({
+                    title: "Database Seeding Initiated",
+                    description: "Sample data is being added to the database.",
+                });
+            } else {
+                 toast({
+                    variant: "destructive",
+                    title: "Seeding Failed",
+                    description: "Could not seed the database. Check console for errors.",
+                });
+            }
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold">Dashboard</h1>
-                    <p className="text-muted-foreground">High-level system overview.</p>
+                    <p className="text-muted-foreground">High-level system overview and quick actions.</p>
                 </div>
                  <div className="flex space-x-2">
                     <Button asChild>
@@ -50,10 +73,8 @@ export default function AdminDashboard() {
                             <PlusCircle className="mr-2 h-4 w-4" /> Add Crop
                         </Link>
                     </Button>
-                    <Button asChild variant="secondary">
-                        <Link href="/admin/weather">
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add Alert
-                        </Link>
+                     <Button onClick={handleSeed} variant="outline">
+                        <Database className="mr-2 h-4 w-4" /> Seed Database
                     </Button>
                 </div>
             </div>
@@ -66,14 +87,27 @@ export default function AdminDashboard() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>A log of recent admin actions will appear here.</CardDescription>
+                    <CardTitle>Quick Actions</CardTitle>
+                     <CardDescription>Quickly add new data to the system.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Recent activity tracking is not yet implemented.</p>
+                <CardContent className="flex space-x-4">
+                     <Button asChild>
+                        <Link href="/admin/crops/new">
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add New Crop
+                        </Link>
+                    </Button>
+                    <Button asChild variant="secondary">
+                        <Link href="/admin/weather/new">
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add Weather Alert
+                        </Link>
+                    </Button>
+                     <Button asChild variant="secondary">
+                        <Link href="/admin/tips/new">
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add Farming Tip
+                        </Link>
+                    </Button>
                 </CardContent>
             </Card>
         </div>
     );
 }
-
