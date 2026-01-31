@@ -37,3 +37,16 @@ export type FarmingTip = {
     scheduledDate: string; // ISO string
     isEnabled: boolean;
 };
+
+export interface CropLifecycle {
+  id: string;
+  cropId: string;
+  sowingDateRange: string;
+  seedRate: string;
+  fertilizerBasalDose: string;
+  fertilizerTopDressing: string;
+  diseasePesticideGuide: string;
+  irrigationSchedule: string;
+  harvestingWindow: string;
+  harvestingReadinessSigns: string;
+}

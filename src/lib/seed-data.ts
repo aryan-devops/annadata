@@ -1,4 +1,4 @@
-import { Crop, WeatherAlert, FarmingTip } from './types';
+import { Crop, WeatherAlert, FarmingTip, CropLifecycle } from './types';
 
 export const crops: Crop[] = [
   {
@@ -69,7 +69,7 @@ export const crops: Crop[] = [
     idealRainfall: '50-100 cm',
     expectedYield: 500,
     approximateMarketPrice: 6025,
-    isVisible: false,
+    isVisible: true,
   },
 ];
 
@@ -162,4 +162,67 @@ export const farmingTips: FarmingTip[] = [
     scheduledDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
     isEnabled: false,
   },
+];
+
+export const cropLifecycles: CropLifecycle[] = [
+    {
+        id: 'lc-wheat',
+        cropId: 'wheat-haryana-rabi',
+        sowingDateRange: 'Late October to mid-November',
+        seedRate: '40-50 kg/acre',
+        fertilizerBasalDose: 'DAP: 50kg, MOP: 20kg, Urea: 35kg per acre',
+        fertilizerTopDressing: 'Urea: 50kg per acre after 25-30 days and at flowering',
+        diseasePesticideGuide: 'For Yellow Rust, spray Propiconazole. For Aphids, use Imidacloprid.',
+        irrigationSchedule: 'Critical stages: Crown Root Initiation, Tillering, Flowering, and Grain Filling. About 5-6 irrigations needed.',
+        harvestingWindow: 'Late March to April',
+        harvestingReadinessSigns: 'Golden yellow stalks, hard and dry grains.'
+    },
+    {
+        id: 'lc-rice',
+        cropId: 'rice-westbengal-kharif',
+        sowingDateRange: 'June to July for transplanting',
+        seedRate: '6-8 kg/acre for transplanting',
+        fertilizerBasalDose: 'SSP: 75kg, Urea: 30kg, MOP: 25kg per acre',
+        fertilizerTopDressing: 'Urea: 35kg per acre in two splits, at tillering and panicle initiation',
+        diseasePesticideGuide: 'For Blast, use Tricyclazole. For Stem Borer, apply Fipronil granules.',
+        irrigationSchedule: 'Maintain 2-5 cm of standing water for most of the growth period. Stop irrigation 15 days before harvest.',
+        harvestingWindow: 'October to December',
+        harvestingReadinessSigns: '80-85% of grains on the panicle are straw-colored.'
+    },
+    {
+        id: 'lc-maize',
+        cropId: 'maize-karnataka-kharif',
+        sowingDateRange: 'June to July',
+        seedRate: '8-10 kg/acre',
+        fertilizerBasalDose: 'DAP: 50kg, MOP: 30kg per acre at sowing',
+        fertilizerTopDressing: 'Urea: 50-60kg per acre at knee-high stage and another 50-60kg at tasseling.',
+        diseasePesticideGuide: 'For Fall Armyworm, use Emamectin Benzoate. For Leaf Blight, Mancozeb spray is effective.',
+        irrigationSchedule: 'Requires irrigation at critical stages like tasseling and silking if there is a dry spell.',
+        harvestingWindow: 'September to October',
+        harvestingReadinessSigns: 'Husk turns brownish, and grains are hard and dry.'
+    },
+    {
+        id: 'lc-sugarcane',
+        cropId: 'sugarcane-maharashtra-annual',
+        sowingDateRange: 'October-November (pre-seasonal) or January-February (suru)',
+        seedRate: '30,000-40,000 setts (stem cuttings) per acre',
+        fertilizerBasalDose: 'Heavy dose of Farm Yard Manure. Chemical: 100kg Urea, 200kg SSP, 60kg MOP per acre.',
+        fertilizerTopDressing: 'Urea in multiple splits at 45, 90, and 120 days after planting.',
+        diseasePesticideGuide: 'For Red Rot, use disease-free setts. For Early Shoot Borer, apply Chlorantraniliprole.',
+        irrigationSchedule: 'Frequent irrigation required. Use furrow irrigation method. Water every 7-10 days in summer.',
+        harvestingWindow: '12-18 months after planting, depending on variety',
+        harvestingReadinessSigns: 'Leaves turn yellow and wither. Canes produce a metallic sound when tapped.'
+    },
+    {
+        id: 'lc-cotton',
+        cropId: 'cotton-gujarat-kharif',
+        sowingDateRange: 'Late May to June',
+        seedRate: '1-2 kg/acre for hybrid seeds',
+        fertilizerBasalDose: 'Full dose of Phosphorus and Potash, and 1/3 of Nitrogen at sowing.',
+        fertilizerTopDressing: 'Remaining Nitrogen in two splits, at squaring and flowering stages.',
+        diseasePesticideGuide: 'For Pink Bollworm, use pheromone traps and timely sprays of specific insecticides. For Whitefly, use Acetamiprid.',
+        irrigationSchedule: 'Irrigate at flowering and boll development stages. Avoid water stress.',
+        harvestingWindow: 'October to January, in multiple pickings',
+        harvestingReadinessSigns: 'Bolls are fully mature and have begun to crack open naturally.'
+    }
 ];

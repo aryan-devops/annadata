@@ -2,7 +2,8 @@
 
 import { notFound, useParams } from 'next/navigation';
 import { useDoc } from '@/firebase/firestore/use-doc';
-import { doc } from 'firebase/firestore';
+import { useCollection } from '@/firebase/firestore/use-collection';
+import { doc, collection, query, where } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { Loader2 } from 'lucide-react';
 import {
@@ -14,7 +15,7 @@ import {
 } from 'lucide-react';
 
 import CropDetailsClient from '@/components/crop-details-client';
-import type { Crop } from '@/lib/types';
+import type { Crop, CropLifecycle } from '@/lib/types';
 
 const iconMap = {
     soilType: <GitBranch className="h-5 w-5 text-primary" />,
@@ -34,9 +35,17 @@ export default function CropPage() {
         () => (firestore && id ? doc(firestore, 'crops', id) : null),
         [firestore, id]
     );
-    const { data: crop, isLoading, error } = useDoc<Crop>(cropRef);
+    const { data: crop, isLoading: isLoadingCrop, error: cropError } = useDoc<Crop>(cropRef);
 
-    if (isLoading) {
+    const lifecycleQuery = useMemoFirebase(
+        () => (firestore && id ? query(collection(firestore, 'cropLifecycles'), where('cropId', '==', id)) : null),
+        [firestore, id]
+    );
+    const { data: lifecycleData, isLoading: isLoadingLifecycle, error: lifecycleError } = useCollection<CropLifecycle>(lifecycleQuery);
+    
+    const cropLifecycle = lifecycleData?.[0];
+
+    if (isLoadingCrop || isLoadingLifecycle) {
         return (
             <div className="flex h-screen items-center justify-center">
                 <Loader2 className="h-16 w-16 animate-spin" />
@@ -44,10 +53,11 @@ export default function CropPage() {
         );
     }
 
-    if (error) {
+    if (cropError || lifecycleError) {
+        console.error("Error loading crop data:", cropError, lifecycleError);
         return (
             <div className="flex h-screen items-center justify-center text-red-500">
-                Error loading crop data.
+                Error loading crop data. Please check the console for details.
             </div>
         );
     }
@@ -67,6 +77,7 @@ export default function CropPage() {
     return (
         <CropDetailsClient 
             crop={crop} 
+            cropLifecycle={cropLifecycle}
             keyInfo={keyInfo} 
             iconMap={iconMap}
         />
