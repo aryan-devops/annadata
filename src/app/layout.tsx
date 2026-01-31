@@ -1,23 +1,34 @@
-import type { Metadata } from 'next';
+'use client';
+
+import { useState, useEffect } from 'react';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { LanguageProvider } from '@/context/language-context';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import AdminLayout from '@/components/admin-layout';
-
-export const metadata: Metadata = {
-  title: 'Annadata AI',
-  description: 'AI-powered farming assistant for Indian farmers',
-};
+import Preloader from '@/components/preloader';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // This simulates the app loading time.
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500); 
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <title>Annadata AI</title>
+        <meta name="description" content="AI-powered farming assistant for Indian farmers" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -26,6 +37,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
+        {isLoading && <Preloader />}
         <FirebaseClientProvider>
           <LanguageProvider>
               <AdminLayout>{children}</AdminLayout>
