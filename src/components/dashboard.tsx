@@ -5,7 +5,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, Loader2, CalendarDays } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import CropCard from './crop-card';
@@ -14,14 +13,17 @@ import { useLanguage } from '@/context/language-context';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { collection } from 'firebase/firestore';
 import { useCollection } from '@/firebase/firestore/use-collection';
-import type { Crop } from '@/lib/types';
+import type { Crop, State } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { locationData, statesList } from '@/lib/location-data';
 
 const translations = {
   location: { en: 'Your Location', hi: 'आपका स्थान', mr: 'तुमचे स्थान', ta: 'உங்கள் இடம்', te: 'మీ స్థానం', bn: 'আপনার অবস্থান' },
   detecting: { en: 'Detecting location...', hi: 'स्थान का पता लगाया जा रहा है...', mr: 'स्थान शोधत आहे...', ta: 'இருப்பிடம் கண்டறியப்படுகிறது...', te: 'స్థానాన్ని గుర్తిస్తోంది...', bn: 'অবস্থান সনাক্ত করা হচ্ছে...' },
-  manualLocation: { en: 'Or enter manually (e.g., Pune, Maharashtra)', hi: 'या मैन्युअल रूप से दर्ज करें (जैसे, पुणे, महाराष्ट्र)', mr: 'किंवा व्यक्तिचलितपणे प्रविष्ट करा (उदा. पुणे, महाराष्ट्र)', ta: 'அல்லது கைமுறையாக உள்ளிடவும் (எ.கா., புனே, மகாராஷ்டிரா)', te: 'లేదా మానవీయంగా నమోదు చేయండి (ఉదా., పూణే, మహారాష్ట్ర)', bn: 'অথবা ম্যানুয়ালি প্রবেশ করুন (যেমন, পুনে, মহারাষ্ট্র)' },
-  setLocation: { en: 'Set', hi: 'सेट करें', mr: 'सेट करा', ta: 'அமை', te: 'సెట్ చేయి', bn: 'সেট করুন' },
+  manualLocation: { en: 'Set Location Manually', hi: 'मैन्युअल रूप से स्थान सेट करें', mr: 'व्यक्तिचलितपणे स्थान सेट करा', ta: 'இருப்பிடத்தை கைமுறையாக அமைக்கவும்', te: 'మానవీయంగా స్థానాన్ని సెట్ చేయండి', bn: 'ম্যানুয়ালি অবস্থান সেট করুন' },
+  setLocation: { en: 'Set Location', hi: 'स्थान सेट करें', mr: 'स्थान सेट करा', ta: 'இடத்தை அமை', te: 'స్థానాన్ని సెట్ చేయి', bn: 'অবস্থান সেট করুন' },
   dailyTip: { en: "Today's Tip", hi: 'आज का सुझाव', mr: 'आजची टीप', ta: 'இன்றைய குறிப்பு', te: 'ఈ రోజు చిట్కా', bn: 'আজকের টিপ' },
   cropRecommendations: { en: 'Crop Recommendations', hi: 'फसल सुझाव', mr: 'पीक शिफारसी', ta: 'பயிர் பரிந்துரைகள்', te: 'పంట సిఫార్సులు', bn: 'ফসলের সুপারিশ' },
   currentWeather: { en: 'Current Weather', hi: 'वर्तमान मौसम', mr: 'सध्याचे हवामान', ta: 'தற்போதைய வானிலை', te: 'ప్రస్తుత వాతావరణం', bn: 'বর্তমান আবহাওয়া' },
@@ -59,36 +61,56 @@ function getCurrentSeason() {
     return null;
 }
 
-
 export default function Dashboard() {
   const [location, setLocation] = useState<string | null>(null);
-  const [manualLocation, setManualLocation] = useState('');
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [weather, setWeather] = useState<any>(null);
   const [isFetchingWeather, setIsFetchingWeather] = useState(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const [selectedSoilType, setSelectedSoilType] = useState('All');
+  const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+  const [selectedState, setSelectedState] = useState<string>('');
+  const [availableDistricts, setAvailableDistricts] = useState<string[]>([]);
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const { t } = useLanguage();
   const currentSeasonInfo = useMemo(getCurrentSeason, []);
 
   const firestore = useFirestore();
   const cropsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'crops'): null, [firestore]);
   const { data: crops, isLoading: isLoadingCrops, error: cropsError } = useCollection<Crop>(cropsCollectionRef);
+  const statesCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'states') : null, [firestore]);
+  const { data: states } = useCollection<State>(statesCollectionRef);
 
   const recommendedCrops = useMemo(() => {
-    if (!crops || !currentSeasonInfo) return crops?.filter(c => c.isVisible) || [];
+    if (!crops || !currentSeasonInfo || !states) return [];
     
-    let seasonCrops = crops.filter(crop =>
+    const currentStateName = weather?.location?.region;
+    const selectedStateObj = states.find(s => s.name === currentStateName);
+    const selectedStateId = selectedStateObj?.id;
+
+    let filteredCrops = crops.filter(crop =>
         crop.isVisible && crop.suitableSeasonIds.includes(currentSeasonInfo.id)
     );
 
+    if (selectedStateId) {
+        filteredCrops = filteredCrops.filter(crop => crop.supportedStateIds.includes(selectedStateId));
+    }
+
     if (selectedSoilType && selectedSoilType !== 'All') {
-        seasonCrops = seasonCrops.filter(crop => crop.soilType === selectedSoilType);
+        filteredCrops = filteredCrops.filter(crop => crop.soilType === selectedSoilType);
     }
     
-    return seasonCrops;
-  }, [crops, currentSeasonInfo, selectedSoilType]);
+    return filteredCrops;
+  }, [crops, currentSeasonInfo, selectedSoilType, weather, states]);
 
+  useEffect(() => {
+    if (selectedState) {
+      setAvailableDistricts(locationData[selectedState as keyof typeof locationData] || []);
+      setSelectedDistrict('');
+    } else {
+      setAvailableDistricts([]);
+    }
+  }, [selectedState]);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -99,6 +121,7 @@ export default function Dashboard() {
       },
       () => {
         setIsLoadingLocation(false);
+        setIsLocationDialogOpen(true);
       },
       { timeout: 10000 }
     );
@@ -138,9 +161,10 @@ export default function Dashboard() {
     }
   }, [location]);
 
-  const handleManualLocation = () => {
-    if (manualLocation.trim()) {
-      setLocation(manualLocation.trim());
+  const handleSetManualLocation = () => {
+    if (selectedState && selectedDistrict) {
+      setLocation(`${selectedDistrict}, ${selectedState}`);
+      setIsLocationDialogOpen(false);
     }
   };
   
@@ -154,6 +178,7 @@ export default function Dashboard() {
   });
 
   return (
+    <>
     <div className="space-y-8">
       {/* Location Section */}
       <Card>
@@ -170,20 +195,17 @@ export default function Dashboard() {
               <span>{t(translations.detecting)}</span>
             </div>
           ) : weather ? (
-            <p className="text-lg font-semibold">{weather.location.name}, {weather.location.country}</p>
+            <div>
+              <p className="text-lg font-semibold">{weather.location.name}, {weather.location.region}, {weather.location.country}</p>
+              <Button onClick={() => setIsLocationDialogOpen(true)} variant="link" className="p-0 h-auto mt-1 text-sm">Change location</Button>
+            </div>
           ) : (
              <div className="flex w-full max-w-sm flex-col items-start space-y-2">
-                <div className="flex w-full items-center space-x-2">
-                    <Input
-                        type="text"
-                        placeholder={t(translations.manualLocation)}
-                        value={manualLocation}
-                        onChange={(e) => setManualLocation(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleManualLocation()}
-                    />
-                    <Button onClick={handleManualLocation}>{t(translations.setLocation)}</Button>
-                </div>
-                {!location && <p className="text-sm text-muted-foreground">{t(translations.couldNotDetectLocation)}</p>}
+                <Button onClick={() => setIsLocationDialogOpen(true)} variant="outline">
+                    <MapPin className="mr-2 h-4 w-4" />
+                    {t(translations.manualLocation)}
+                </Button>
+                <p className="text-sm text-muted-foreground">{t(translations.couldNotDetectLocation)}</p>
             </div>
           )}
         </CardContent>
@@ -265,7 +287,7 @@ export default function Dashboard() {
                         {currentSeasonInfo ? (
                                 <CardDescription className="flex items-center gap-2 mt-1">
                                     <CalendarDays className="h-4 w-4" />
-                                    <span>{t(translations.basedOnSeason)}: <span className="font-semibold text-primary">{currentSeasonInfo.name}</span></span>
+                                    <span>{t(translations.basedOnSeason)}: <span className="font-semibold text-primary">{currentSeasonInfo.name}</span> { weather?.location?.region && <>in <span className="font-semibold text-primary">{weather.location.region}</span></>}</span>
                                 </CardDescription>
                             ) : (
                                 <CardDescription>Based on your location and current season.</CardDescription>
@@ -293,7 +315,7 @@ export default function Dashboard() {
               ))}
                {!isLoadingCrops && recommendedCrops.length === 0 && (
                  <div className="col-span-full text-center text-muted-foreground py-16">
-                    <p>No recommended crops found for the selected soil type this season.</p>
+                    <p>No recommended crops found for the selected criteria this season.</p>
                  </div>
                )}
             </CardContent>
@@ -301,5 +323,51 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+
+    <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Select Your Location</DialogTitle>
+          <DialogDescription>
+            Choose your state and district to get tailored weather and crop recommendations.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid grid-cols-1 gap-4 py-4">
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="state-select">State</Label>
+            <Select value={selectedState} onValueChange={setSelectedState}>
+              <SelectTrigger id="state-select">
+                <SelectValue placeholder="Select a state" />
+              </SelectTrigger>
+              <SelectContent>
+                {statesList.map(stateName => (
+                  <SelectItem key={stateName} value={stateName}>{stateName}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="district-select">District</Label>
+            <Select value={selectedDistrict} onValueChange={setSelectedDistrict} disabled={!selectedState}>
+              <SelectTrigger id="district-select">
+                <SelectValue placeholder="Select a district" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableDistricts.map(districtName => (
+                  <SelectItem key={districtName} value={districtName}>{districtName}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => setIsLocationDialogOpen(false)}>Cancel</Button>
+          <Button type="submit" onClick={handleSetManualLocation} disabled={!selectedDistrict || !selectedState}>
+            {t(translations.setLocation)}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
