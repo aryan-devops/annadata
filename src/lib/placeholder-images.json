@@ -47,6 +47,18 @@
       "description": "A freshly harvested pile of potatoes on rich soil.",
       "imageUrl": "https://images.unsplash.com/photo-1590486803833-1c58779c5683?q=80&w=1080",
       "imageHint": "harvested potatoes"
+    },
+    {
+      "id": "groundnut",
+      "description": "A close-up of harvested groundnuts.",
+      "imageUrl": "https://images.unsplash.com/photo-1594280387556-0026332152bd?q=80&w=1080",
+      "imageHint": "harvested groundnuts"
+    },
+    {
+      "id": "chickpea",
+      "description": "A bowl of fresh chickpeas.",
+      "imageUrl": "https://images.unsplash.com/photo-1625993791283-913a8a364b6a?q=80&w=1080",
+      "imageHint": "chickpea bowl"
     }
   ]
 }
