@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "wheat",
+      "description": "A golden field of wheat ready for harvest under a clear blue sky.",
+      "imageUrl": "https://images.unsplash.com/photo-1514481043218-e965c5886f06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHx3aGVhdCUyMGZpZWxkfGVufDB8fHx8MTc2OTgwOTkyMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wheat field"
+    },
+    {
+      "id": "rice",
+      "description": "Lush green paddy fields with young rice shoots.",
+      "imageUrl": "https://images.unsplash.com/photo-1599328580087-15c9dab481f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwYWRkeSUyMGZpZWxkfGVufDB8fHx8MTc2OTc4ODExNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "paddy field"
+    },
+    {
+      "id": "corn",
+      "description": "Tall stalks of corn with developing cobs.",
+      "imageUrl": "https://images.unsplash.com/photo-1551810080-3eb3be72d3f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjb3JuJTIwZmllbGR8ZW58MHx8fHwxNzY5NzY3NTg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "corn field"
+    },
+    {
+      "id": "sugarcane",
+      "description": "A dense plantation of tall sugarcane stalks.",
+      "imageUrl": "https://picsum.photos/seed/sugarcane/600/400",
+      "imageHint": "sugarcane plantation"
+    },
+    {
+      "id": "cotton",
+      "description": "Cotton plant with fluffy white bolls.",
+      "imageUrl": "https://images.unsplash.com/photo-1633527992904-53f86f81a23a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjb3R0b24lMjBwbGFudHxlbnwwfHx8fDE3Njk3NDc2MDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cotton plant"
+    },
+    {
+      "id": "mustard",
+      "description": "A vibrant yellow field of mustard flowers in full bloom.",
+      "imageUrl": "https://images.unsplash.com/photo-1421930866250-aa0594cea05c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtdXN0YXJkJTIwZmllbGR8ZW58MHx8fHwxNzY5ODUxMjI2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mustard field"
+    }
+  ]
 }
