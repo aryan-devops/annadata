@@ -23,6 +23,7 @@ const translations = {
   location: { en: 'Your Location', hi: 'आपका स्थान', mr: 'तुमचे स्थान', ta: 'உங்கள் இடம்', te: 'మీ స్థానం', bn: 'আপনার অবস্থান' },
   detecting: { en: 'Detecting location...', hi: 'स्थान का पता लगाया जा रहा है...', mr: 'स्थान शोधत आहे...', ta: 'இருப்பிடம் கண்டறியப்படுகிறது...', te: 'స్థానాన్ని గుర్తిస్తోంది...', bn: 'অবস্থান সনাক্ত করা হচ্ছে...' },
   manualLocation: { en: 'Set Location Manually', hi: 'मैन्युअल रूप से स्थान सेट करें', mr: 'व्यक्तिचलितपणे स्थान सेट करा', ta: 'இருப்பிடத்தை கைமுறையாக அமைக்கவும்', te: 'మానవీయంగా స్థానాన్ని సెట్ చేయండి', bn: 'ম্যানুয়ালি অবস্থান সেট করুন' },
+  changeLocation: { en: 'Change Location', hi: 'स्थान बदलें', mr: 'स्थान बदला', ta: 'இருப்பிடத்தை மாற்றவும்', te: 'స్థానాన్ని మార్చండి', bn: 'অবস্থান পরিবর্তন করুন' },
   setLocation: { en: 'Set Location', hi: 'स्थान सेट करें', mr: 'स्थान सेट करा', ta: 'இடத்தை அமை', te: 'స్థానాన్ని సెట్ చేయి', bn: 'অবস্থান সেট করুন' },
   dailyTip: { en: "Today's Tip", hi: 'आज का सुझाव', mr: 'आजची टीप', ta: 'இன்றைய குறிப்பு', te: 'ఈ రోజు చిట్కా', bn: 'আজকের টিপ' },
   cropRecommendations: { en: 'Crop Recommendations', hi: 'फसल सुझाव', mr: 'पीक शिफारसी', ta: 'பயிர் பரிந்துரைகள்', te: 'పంట సిఫార్సులు', bn: 'ফসলের সুপারিশ' },
@@ -121,7 +122,8 @@ export default function Dashboard() {
       },
       () => {
         setIsLoadingLocation(false);
-        setIsLocationDialogOpen(true);
+        // Don't open dialog automatically, let user click button
+        // setIsLocationDialogOpen(true);
       },
       { timeout: 10000 }
     );
@@ -188,26 +190,23 @@ export default function Dashboard() {
             {t(translations.location)}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          {isLoadingLocation ? (
-            <div className="flex items-center space-x-2 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>{t(translations.detecting)}</span>
-            </div>
-          ) : weather ? (
+        <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <p className="text-lg font-semibold">{weather.location.name}, {weather.location.region}, {weather.location.country}</p>
-              <Button onClick={() => setIsLocationDialogOpen(true)} variant="link" className="p-0 h-auto mt-1 text-sm">Change location</Button>
+                {isLoadingLocation ? (
+                <div className="flex items-center space-x-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>{t(translations.detecting)}</span>
+                </div>
+                ) : weather ? (
+                <p className="text-lg font-semibold">{weather.location.name}, {weather.location.region}, {weather.location.country}</p>
+                ) : (
+                    <p className="text-muted-foreground">{t(translations.couldNotDetectLocation)}</p>
+                )}
             </div>
-          ) : (
-             <div className="flex w-full max-w-sm flex-col items-start space-y-2">
-                <Button onClick={() => setIsLocationDialogOpen(true)} variant="outline">
-                    <MapPin className="mr-2 h-4 w-4" />
-                    {t(translations.manualLocation)}
-                </Button>
-                <p className="text-sm text-muted-foreground">{t(translations.couldNotDetectLocation)}</p>
-            </div>
-          )}
+            <Button onClick={() => setIsLocationDialogOpen(true)} variant="outline" className="w-full sm:w-auto flex-shrink-0">
+                <MapPin className="mr-2 h-4 w-4" />
+                {weather ? t(translations.changeLocation) : t(translations.manualLocation)}
+            </Button>
         </CardContent>
       </Card>
       
@@ -371,3 +370,5 @@ export default function Dashboard() {
     </>
   );
 }
+
+    
