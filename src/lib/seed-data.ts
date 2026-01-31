@@ -1,3 +1,4 @@
+
 import { Crop, WeatherAlert, FarmingTip, CropLifecycle } from './types';
 
 export const crops: Crop[] = [
