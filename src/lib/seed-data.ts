@@ -1,5 +1,40 @@
 
-import { Crop, WeatherAlert, FarmingTip, CropLifecycle } from './types';
+import { Crop, WeatherAlert, FarmingTip, CropLifecycle, State, Season } from './types';
+
+export const states: State[] = [
+  { id: 'haryana', name: 'Haryana', climateZone: 'Subtropical' },
+  { id: 'punjab', name: 'Punjab', climateZone: 'Subtropical' },
+  { id: 'uttar-pradesh', name: 'Uttar Pradesh', climateZone: 'Subtropical' },
+  { id: 'west-bengal', name: 'West Bengal', climateZone: 'Tropical' },
+  { id: 'andhra-pradesh', name: 'Andhra Pradesh', climateZone: 'Tropical' },
+  { id: 'karnataka', name: 'Karnataka', climateZone: 'Tropical' },
+  { id: 'maharashtra', name: 'Maharashtra', climateZone: 'Tropical' },
+  { id: 'rajasthan', name: 'Rajasthan', climateZone: 'Arid' },
+  { id: 'gujarat', name: 'Gujarat', climateZone: 'Arid' },
+  { id: 'telangana', name: 'Telangana', climateZone: 'Tropical' },
+];
+
+export const seasons: Season[] = [
+  {
+    id: 'kharif',
+    name: 'Kharif',
+    startDate: new Date(new Date().getFullYear(), 5, 1).toISOString(),
+    endDate: new Date(new Date().getFullYear(), 9, 31).toISOString(),
+  },
+  {
+    id: 'rabi',
+    name: 'Rabi',
+    startDate: new Date(new Date().getFullYear(), 10, 1).toISOString(),
+    endDate: new Date(new Date().getFullYear() + 1, 2, 31).toISOString(),
+  },
+  {
+    id: 'zaid',
+    name: 'Zaid',
+    startDate: new Date(new Date().getFullYear(), 3, 1).toISOString(),
+    endDate: new Date(new Date().getFullYear(), 4, 31).toISOString(),
+  },
+];
+
 
 export const crops: Crop[] = [
   {
@@ -70,6 +105,34 @@ export const crops: Crop[] = [
     idealRainfall: '50-100 cm',
     expectedYield: 500,
     approximateMarketPrice: 6025,
+    isVisible: true,
+  },
+  {
+    id: 'mustard-rajasthan-rabi',
+    nameEnglish: 'Mustard',
+    nameLocal: 'सरसों',
+    imageUrl: 'https://images.unsplash.com/photo-1421930866250-aa0594cea05c?q=80&w=1080',
+    supportedStateIds: ['rajasthan', 'haryana', 'uttar-pradesh'],
+    suitableSeasonIds: ['rabi'],
+    soilType: 'Sandy Loam',
+    idealTemperature: '10-25°C',
+    idealRainfall: '35-50 cm',
+    expectedYield: 800,
+    approximateMarketPrice: 5450,
+    isVisible: true,
+  },
+  {
+    id: 'potato-uttarpradesh-rabi',
+    nameEnglish: 'Potato',
+    nameLocal: 'आलू',
+    imageUrl: 'https://images.unsplash.com/photo-1590486803833-1c58779c5683?q=80&w=1080',
+    supportedStateIds: ['uttar-pradesh', 'west-bengal', 'punjab'],
+    suitableSeasonIds: ['rabi'],
+    soilType: 'Well-drained Sandy Loam',
+    idealTemperature: '15-20°C',
+    idealRainfall: '50-75 cm',
+    expectedYield: 12000,
+    approximateMarketPrice: 1500,
     isVisible: true,
   },
 ];
@@ -225,5 +288,30 @@ export const cropLifecycles: CropLifecycle[] = [
         irrigationSchedule: 'Irrigate at flowering and boll development stages. Avoid water stress.',
         harvestingWindow: 'October to January, in multiple pickings',
         harvestingReadinessSigns: 'Bolls are fully mature and have begun to crack open naturally.'
+    },
+    {
+        id: 'lc-mustard',
+        cropId: 'mustard-rajasthan-rabi',
+        sowingDateRange: 'Late September to October',
+        seedRate: '1.5-2 kg/acre',
+        fertilizerBasalDose: '25 kg DAP per acre',
+        fertilizerTopDressing: 'Urea: 25 kg per acre after 30-35 days',
+        diseasePesticideGuide: 'For Aphids, spray Imidacloprid. For White Rust, use Mancozeb.',
+        irrigationSchedule: 'One irrigation at flowering stage is crucial if winter rains fail.',
+        harvestingWindow: 'February to March',
+        harvestingReadinessSigns: 'Pods turn yellow and seeds become hard.'
+    },
+    {
+        id: 'lc-potato',
+        cropId: 'potato-uttarpradesh-rabi',
+        sowingDateRange: 'October to November',
+        seedRate: '600-800 kg/acre of certified seed tubers',
+        fertilizerBasalDose: 'FYM: 10 tons/acre. N:P:K at 50:30:50 kg/acre.',
+        fertilizerTopDressing: '50 kg Nitrogen/acre at earthing up (25-30 days after planting).',
+        diseasePesticideGuide: 'For Late Blight, spray Mancozeb or Chlorothalonil. For Potato Tuber Moth, use pheromone traps.',
+        irrigationSchedule: 'Frequent light irrigations are needed. Maintain soil moisture. Critical stages are stolon formation and tuber development.',
+        harvestingWindow: 'January to March',
+        harvestingReadinessSigns: 'Haulms (stems) start to yellow and dry up.'
     }
 ];
+

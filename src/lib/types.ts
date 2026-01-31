@@ -50,3 +50,16 @@ export interface CropLifecycle {
   harvestingWindow: string;
   harvestingReadinessSigns: string;
 }
+
+export interface State {
+  id: string;
+  name: string;
+  climateZone: string;
+}
+
+export interface Season {
+  id: string;
+  name: string;
+  startDate: string; // ISO string
+  endDate: string; // ISO string
+}

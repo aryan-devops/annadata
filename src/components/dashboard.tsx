@@ -1,9 +1,9 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
-import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, Loader2 } from 'lucide-react';
+import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, Loader2, CalendarDays } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import { useLanguage } from '@/context/language-context';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { collection } from 'firebase/firestore';
 import { useCollection } from '@/firebase/firestore/use-collection';
-import type { Crop } from '@/lib/types';
+import type { Crop, Season } from '@/lib/types';
 
 const translations = {
   location: { en: 'Your Location', hi: 'आपका स्थान', mr: 'तुमचे स्थान', ta: 'உங்கள் இடம்', te: 'మీ స్థానం', bn: 'আপনার অবস্থান' },
@@ -29,7 +29,31 @@ const translations = {
   humidity: { en: 'Humidity', hi: 'नमी', mr: 'आर्द्रता', ta: 'ஈரப்பதம்', te: 'తేమ', bn: 'আর্দ্রতা' },
   enterLocationPrompt: { en: 'Enter a location to see the weather.', hi: 'मौसम देखने के लिए एक स्थान दर्ज करें।', mr: 'हवामान पाहण्यासाठी स्थान प्रविष्ट करा.', ta: 'வானிலையைப் பார்க்க ஒரு இடத்தைப் உள்ளிடவும்.', te: 'వాతావరణం చూడటానికి ఒక స్థానాన్ని నమోదు చేయండి.', bn: 'আবহাওয়া দেখতে একটি অবস্থান লিখুন।' },
   couldNotDetectLocation: { en: 'Your location could not be automatically detected. Please enter it manually.', hi: 'आपके स्थान का स्वचालित रूप से पता नहीं लगाया जा सका। कृपया इसे मैन्युअल रूप से दर्ज करें।', mr: 'तुमचे स्थान आपोआप शोधले जाऊ शकले नाही. कृपया ते व्यक्तिचलितपणे प्रविष्ट करा.', ta: 'உங்கள் இருப்பிடத்தை தானாக கண்டறிய முடியவில்லை. தயவுசெய்து அதை கைமுறையாக உள்ளிடவும்.', te: 'మీ స్థానం స్వయంచాలకంగా గుర్తించబడలేదు. దయచేసి దాన్ని మాన్యువల్‌గా నమోదు చేయండి.', bn: 'আপনার অবস্থান স্বয়ংক্রিয়ভাবে সনাক্ত করা যায়নি। অনুগ্রহ করে এটি ম্যানুয়ালি প্রবেশ করান।' },
+  basedOnSeason: { en: 'Based on the current season', hi: 'वर्तमान मौसम के आधार पर', mr: 'सध्याच्या हंगामावर आधारित', ta: 'தற்போதைய பருவத்தின் அடிப்படையில்', te: 'ప్రస్తుత సీజన్ ఆధారంగా', bn: 'বর্তমান মৌসুমের উপর ভিত্তি করে' },
 };
+
+const seasonDefinitions = [
+    { id: 'kharif', name: 'Kharif', startMonth: 5, endMonth: 9 }, // June to Oct (0-indexed months)
+    { id: 'rabi', name: 'Rabi', startMonth: 10, endMonth: 2 }, // Nov to Mar
+    { id: 'zaid', name: 'Zaid', startMonth: 3, endMonth: 4 }, // Apr to May
+];
+
+function getCurrentSeason() {
+    const currentMonth = new Date().getMonth();
+    for (const season of seasonDefinitions) {
+        if (season.startMonth <= season.endMonth) {
+            if (currentMonth >= season.startMonth && currentMonth <= season.endMonth) {
+                return season;
+            }
+        } else {
+            if (currentMonth >= season.startMonth || currentMonth <= season.endMonth) {
+                return season;
+            }
+        }
+    }
+    return null;
+}
+
 
 export default function Dashboard() {
   const [location, setLocation] = useState<string | null>(null);
@@ -39,10 +63,19 @@ export default function Dashboard() {
   const [isFetchingWeather, setIsFetchingWeather] = useState(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const { t } = useLanguage();
+  const currentSeasonInfo = useMemo(getCurrentSeason, []);
 
   const firestore = useFirestore();
   const cropsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'crops'): null, [firestore]);
   const { data: crops, isLoading: isLoadingCrops, error: cropsError } = useCollection<Crop>(cropsCollectionRef);
+
+  const recommendedCrops = useMemo(() => {
+    if (!crops || !currentSeasonInfo) return crops?.filter(c => c.isVisible) || [];
+    return crops.filter(crop =>
+        crop.isVisible && crop.suitableSeasonIds.includes(currentSeasonInfo.id)
+    );
+  }, [crops, currentSeasonInfo]);
+
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -214,12 +247,19 @@ export default function Dashboard() {
           <Card>
              <CardHeader>
               <CardTitle>{t(translations.cropRecommendations)}</CardTitle>
-              <CardDescription>Based on your location and current season.</CardDescription>
+               {currentSeasonInfo ? (
+                    <CardDescription className="flex items-center gap-2">
+                        <CalendarDays className="h-4 w-4" />
+                        <span>{t(translations.basedOnSeason)}: <span className="font-semibold text-primary">{currentSeasonInfo.name}</span></span>
+                    </CardDescription>
+                ) : (
+                    <CardDescription>Based on your location and current season.</CardDescription>
+                )}
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
               {isLoadingCrops && <div className="col-span-full flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>}
               {cropsError && <p className="col-span-full text-destructive">Error loading crops.</p>}
-              {crops?.filter(c => c.isVisible).map(crop => (
+              {recommendedCrops.map(crop => (
                 <CropCard key={crop.id} crop={crop} />
               ))}
             </CardContent>

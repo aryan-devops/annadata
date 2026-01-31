@@ -1,10 +1,24 @@
 'use client';
 import { collection, doc, Firestore } from 'firebase/firestore';
 import { setDocumentNonBlocking } from './non-blocking-updates';
-import { crops, weatherAlerts, farmingTips, cropLifecycles } from '@/lib/seed-data';
+import { crops, weatherAlerts, farmingTips, cropLifecycles, states, seasons } from '@/lib/seed-data';
 
 export function seedDatabase(firestore: Firestore) {
     try {
+        // Seed states
+        const statesCollectionRef = collection(firestore, 'states');
+        states.forEach(state => {
+            const docRef = doc(statesCollectionRef, state.id);
+            setDocumentNonBlocking(docRef, state, { merge: true });
+        });
+
+        // Seed seasons
+        const seasonsCollectionRef = collection(firestore, 'seasons');
+        seasons.forEach(season => {
+            const docRef = doc(seasonsCollectionRef, season.id);
+            setDocumentNonBlocking(docRef, season, { merge: true });
+        });
+
         // Seed crops
         const cropsCollectionRef = collection(firestore, 'crops');
         crops.forEach(crop => {
