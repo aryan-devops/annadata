@@ -10,187 +10,54 @@
  * and authorization model (e.g., role-based access control).
  *
  * Key Security Decisions:
- * - Open Access for Prototyping: The `isAdmin()` function is temporarily set to
- *   `return true;`, which grants open read/write access to all collections.
+ * - Open Access for Prototyping: The rules are temporarily set to `allow read, write: if true;`
+ *   which grants open read/write access to all collections.
  *   This is to facilitate development as requested.
  * - Future-Ready Structure: The rules are structured per-collection, making it easy
- *   to apply granular security by switching `isAdmin()` back to its secure
- *   implementation once the authentication feature is implemented.
+ *   to apply granular security later.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     // -------------------------------------------------------------------------
-    // Helper Functions
+    // Collection Rules - OPEN FOR DEVELOPMENT
     // -------------------------------------------------------------------------
 
-    /**
-     * Checks if a user is authenticated.
-     */
-    /*function isSignedIn() {
-      return request.auth != null;
-    }*/
-
-    /**
-     * Checks if the authenticated user has admin privileges.
-     * WARNING: This is temporarily set to `true` for the testing phase.
-     * This makes your database publicly readable and writable.
-     *
-     * Secure Implementation Example:
-     *   return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
-     */
-    function isAdmin() {
-      // Temporarily open for development.
-      // TODO: Re-secure this before production.
-      return true;
-    }
-
-    /**
-     * Ensures the user is an admin and the document already exists.
-     * Used for safe update and delete operations.
-     */
-    /*function isExistingAdmin() {
-      return isAdmin() && exists(resource.path);
-    }*/
-
-    // -------------------------------------------------------------------------
-    // Collection Rules
-    // -------------------------------------------------------------------------
-
-    /**
-     * @description Manages all crop data. Only admins can read or write crop information.
-     * @path /crops/{cropId}
-     * @allow An admin user (create) can add a new crop document.
-     * @deny A non-admin or unauthenticated user (get) cannot read a crop document.
-     * @principle Enforces global admin-only access for a core data collection.
-     */
     match /crops/{cropId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    /**
-     * @description Manages state and region data. Only admins can read or write this data.
-     * @path /states/{stateId}
-     * @allow An admin user (list) can retrieve all states.
-     * @deny A non-admin user (create) cannot add a new state.
-     * @principle Enforces global admin-only access for a core data collection.
-     */
     match /states/{stateId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    /**
-     * @description Manages season data (e.g., Kharif, Rabi). Only admins can read or write this data.
-     * @path /seasons/{seasonId}
-     * @allow An admin user (update) can modify an existing season.
-     * @deny A non-admin user (delete) cannot remove a season.
-     * @principle Enforces global admin-only access for a core data collection.
-     */
     match /seasons/{seasonId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    /**
-     * @description Manages detailed lifecycle guides for each crop. Only admins can read or write this data.
-     * @path /cropLifecycles/{cropLifecycleId}
-     * @allow An admin user (get) can read a specific crop lifecycle document.
-     * @deny A non-admin user (list) cannot list all lifecycle documents.
-     * @principle Enforces global admin-only access for a core data collection.
-     */
     match /cropLifecycles/{cropLifecycleId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    /**
-     * @description Manages weather alerts and thresholds. Only admins can read or write this data.
-     * @path /weatherAlerts/{weatherAlertId}
-     * @allow An admin user (create) can define a new weather alert.
-     * @deny A non-admin user (update) cannot modify an existing alert.
-     * @principle Enforces global admin-only access for a core data collection.
-     */
     match /weatherAlerts/{weatherAlertId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    /**
-     * @description Manages application-wide translations. Only admins can read or write this data.
-     * @path /translations/{translationId}
-     * @allow An admin user (update) can correct a translation.
-     * @deny A non-admin user (create) cannot add a new translation key.
-     * @principle Enforces global admin-only access for a core data collection.
-     */
     match /translations/{translationId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    /**
-     * @description Manages daily farming tips. Only admins can read or write this data.
-     * @path /farmingTips/{farmingTipId}
-     * @allow An admin user (delete) can remove an outdated farming tip.
-     * @deny A non-admin user (list) cannot see all farming tips.
-     * @principle Enforces global admin-only access for a core data collection.
-     */
     match /farmingTips/{farmingTipId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    /**
-     * @description Manages government scheme information. Only admins can read or write this data.
-     * @path /governmentSchemes/{governmentSchemeId}
-     * @allow An admin user (create) can add a new government scheme.
-     * @deny A non-admin user (get) cannot read scheme details.
-     * @principle Enforces global admin-only access for a core data collection.
-     */
     match /governmentSchemes/{governmentSchemeId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    /**
-     * @description Manages content marked for offline availability. Only admins can read or write this data.
-     * @path /offlineContent/{offlineContentId}
-     * @allow An admin user (update) can flag content for a cache refresh.
-     * @deny A non-admin user (delete) cannot remove offline content records.
-     * @principle Enforces global admin-only access for a core data collection.
-     */
     match /offlineContent/{offlineContentId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
   }
 }
