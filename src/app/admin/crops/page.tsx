@@ -67,8 +67,8 @@ export default function AdminCropsPage() {
       soilType: '',
       idealTemperature: '',
       idealRainfall: '',
-      expectedYield: 0,
-      approximateMarketPrice: 0,
+      expectedYield: 1,
+      approximateMarketPrice: 1,
       isVisible: true,
     });
     setIsFormOpen(true);
@@ -114,7 +114,10 @@ export default function AdminCropsPage() {
       toast({ title: 'Crop Updated', description: `${values.nameEnglish} has been updated.` });
     } else {
       // Create
-      const newId = values.nameEnglish.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const baseId = values.nameEnglish.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 20);
+      const uniquePart = Date.now().toString(36);
+      const newId = baseId ? `${baseId}-${uniquePart}` : `crop-${uniquePart}`;
+
       const docRef = doc(firestore, 'crops', newId);
       setDocumentNonBlocking(docRef, {...dataToSave, id: newId}, { merge: false });
       toast({ title: 'Crop Added', description: `${values.nameEnglish} has been added.` });
