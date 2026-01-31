@@ -3,13 +3,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Wheat, Droplets, BookOpen, Loader2, Database } from 'lucide-react';
+import { PlusCircle, Wheat, Droplets, BookOpen, Database } from 'lucide-react';
 import { useCollection } from "@/firebase/firestore/use-collection";
 import { collection } from "firebase/firestore";
 import { useFirestore, useMemoFirebase } from "@/firebase/provider";
 import Link from "next/link";
 import { seedDatabase } from '@/firebase/seed';
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 function StatCard({ title, value, icon, isLoading }: { title: string, value: number | string, icon: React.ReactNode, isLoading?: boolean }) {
@@ -21,7 +22,7 @@ function StatCard({ title, value, icon, isLoading }: { title: string, value: num
             </CardHeader>
             <CardContent>
                 {isLoading ? (
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    <Skeleton className="h-8 w-20" />
                 ) : (
                     <div className="text-2xl font-bold">{value}</div>
                 )}
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold">Dashboard</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
                     <p className="text-muted-foreground">High-level system overview and quick actions.</p>
                 </div>
                  <div className="flex space-x-2">
@@ -90,7 +91,7 @@ export default function AdminDashboard() {
                     <CardTitle>Quick Actions</CardTitle>
                      <CardDescription>Quickly add new data to the system.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex space-x-4">
+                <CardContent className="flex flex-wrap gap-4">
                      <Button asChild>
                         <Link href="/admin/crops">
                             <PlusCircle className="mr-2 h-4 w-4" /> Add New Crop

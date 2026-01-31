@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { PlusCircle, Edit, Trash2, Loader2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCollection } from '@/firebase/firestore/use-collection';
@@ -21,6 +21,7 @@ import { collection, doc } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { setDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -38,6 +39,40 @@ const formSchema = z.object({
 });
 
 type CropFormValues = z.infer<typeof formSchema>;
+
+function TableSkeleton() {
+  return (
+    <div className="rounded-md border">
+        <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead><Skeleton className="h-5 w-32" /></TableHead>
+                <TableHead className="hidden md:table-cell"><Skeleton className="h-5 w-32" /></TableHead>
+                <TableHead className="hidden lg:table-cell"><Skeleton className="h-5 w-24" /></TableHead>
+                <TableHead><Skeleton className="h-5 w-16" /></TableHead>
+                <TableHead className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[...Array(5)].map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                  <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-40" /></TableCell>
+                  <TableCell className="hidden lg:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-10" /></TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-2">
+                        <Skeleton className="h-10 w-10" />
+                        <Skeleton className="h-10 w-10" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+        </Table>
+    </div>
+  )
+}
 
 export default function AdminCropsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -140,11 +175,7 @@ export default function AdminCropsPage() {
           </Button>
         </CardHeader>
         <CardContent>
-          {isLoading && (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          )}
+          {isLoading && <TableSkeleton />}
           {error && (
              <div className="text-red-500 p-4 border border-red-500 rounded-md">
                 <p><strong>Error:</strong> Failed to load crops.</p>
@@ -226,7 +257,7 @@ export default function AdminCropsPage() {
                     control={form.control}
                     name="isVisible"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50">
                         <div className="space-y-0.5">
                           <FormLabel>Visible to Farmers</FormLabel>
                         </div>

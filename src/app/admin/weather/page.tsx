@@ -14,13 +14,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { PlusCircle, Edit, Trash2, Loader2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection, doc } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { setDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -34,6 +35,39 @@ const formSchema = z.object({
 });
 
 type AlertFormValues = z.infer<typeof formSchema>;
+
+function TableSkeleton() {
+  return (
+    <div className="rounded-md border">
+        <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead><Skeleton className="h-5 w-3/4" /></TableHead>
+                <TableHead className="hidden md:table-cell"><Skeleton className="h-5 w-48" /></TableHead>
+                <TableHead><Skeleton className="h-5 w-16" /></TableHead>
+                <TableHead className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[...Array(5)].map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-5 w-full" /></TableCell>
+                  <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-40" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-10" /></TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-2">
+                        <Skeleton className="h-10 w-10" />
+                        <Skeleton className="h-10 w-10" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+        </Table>
+    </div>
+  )
+}
+
 
 export default function AdminWeatherPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -124,11 +158,7 @@ export default function AdminWeatherPage() {
           </Button>
         </CardHeader>
         <CardContent>
-          {isLoading && (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          )}
+          {isLoading && <TableSkeleton />}
           {error && (
              <div className="text-red-500 p-4 border border-red-500 rounded-md">
                 <p><strong>Error:</strong> Failed to load alerts.</p>
@@ -192,8 +222,8 @@ export default function AdminWeatherPage() {
                     <FormField control={form.control} name="thresholdTemperatureMax" render={({ field }) => (<FormItem><FormLabel>Max Temp (°C)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="frostRisk" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm"><FormLabel>Frost Risk</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
-                    <FormField control={form.control} name="isEnabled" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm"><FormLabel>Enabled</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
+                    <FormField control={form.control} name="frostRisk" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50"><FormLabel>Frost Risk</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
+                    <FormField control={form.control} name="isEnabled" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50"><FormLabel>Enabled</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
                 </div>
               <DialogFooter className="pt-4 border-t">
                 <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}>Cancel</Button>

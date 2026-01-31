@@ -16,7 +16,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { PlusCircle, Edit, Trash2, Loader2, CalendarIcon } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, CalendarIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection, doc } from 'firebase/firestore';
@@ -25,6 +25,7 @@ import { setDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlo
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -35,6 +36,38 @@ const formSchema = z.object({
 });
 
 type TipFormValues = z.infer<typeof formSchema>;
+
+function TableSkeleton() {
+  return (
+    <div className="rounded-md border">
+        <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead><Skeleton className="h-5 w-3/4" /></TableHead>
+                <TableHead className="hidden md:table-cell"><Skeleton className="h-5 w-32" /></TableHead>
+                <TableHead><Skeleton className="h-5 w-16" /></TableHead>
+                <TableHead className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[...Array(5)].map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-5 w-full" /></TableCell>
+                  <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-40" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-10" /></TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-2">
+                        <Skeleton className="h-10 w-10" />
+                        <Skeleton className="h-10 w-10" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+        </Table>
+    </div>
+  )
+}
 
 export default function AdminTipsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -124,7 +157,7 @@ export default function AdminTipsPage() {
           </Button>
         </CardHeader>
         <CardContent>
-          {isLoading && <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
+          {isLoading && <TableSkeleton />}
           {error && <div className="text-red-500 p-4 border border-red-500 rounded-md"><p><strong>Error:</strong> {error.message}</p></div>}
           {!isLoading && !error && (
             <div className="rounded-md border">
@@ -187,7 +220,7 @@ export default function AdminTipsPage() {
                         <FormMessage /></FormItem>
                     )} />
                 </div>
-                <FormField control={form.control} name="isEnabled" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm"><FormLabel>Enabled</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
+                <FormField control={form.control} name="isEnabled" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50"><FormLabel>Enabled</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
               <DialogFooter className="pt-4 border-t">
                 <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}>Cancel</Button>
                 <Button type="submit">{selectedTip ? 'Save Changes' : 'Create Tip'}</Button>

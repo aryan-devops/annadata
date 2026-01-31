@@ -7,6 +7,10 @@ import { LanguageProvider } from '@/context/language-context';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import AdminLayout from '@/components/admin-layout';
 import Preloader from '@/components/preloader';
+import { Inter } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export default function RootLayout({
   children,
@@ -16,10 +20,10 @@ export default function RootLayout({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // This simulates the app loading time.
+    // Simulates app loading time.
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1500); 
+    }, 2000); 
 
     return () => clearTimeout(timer);
   }, []);
@@ -27,23 +31,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>Annadata AI</title>
+        <title>Annadata AI v2.0</title>
         <meta name="description" content="AI-powered farming assistant for Indian farmers" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
-          rel="stylesheet"
-        />
       </head>
-      <body className="font-body antialiased">
-        {isLoading && <Preloader />}
-        <FirebaseClientProvider>
-          <LanguageProvider>
-              <AdminLayout>{children}</AdminLayout>
-            <Toaster />
-          </LanguageProvider>
-        </FirebaseClientProvider>
+      <body className={cn("font-sans antialiased", inter.variable)}>
+        {isLoading ? <Preloader /> : (
+          <FirebaseClientProvider>
+            <LanguageProvider>
+                <AdminLayout>{children}</AdminLayout>
+              <Toaster />
+            </LanguageProvider>
+          </FirebaseClientProvider>
+        )}
       </body>
     </html>
   );

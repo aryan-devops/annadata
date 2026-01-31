@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
-import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, Loader2, CalendarDays } from 'lucide-react';
+import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, CalendarDays, Edit } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { locationData, statesList } from '@/lib/location-data';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const translations = {
   location: { en: 'Your Location', hi: 'आपका स्थान', mr: 'तुमचे स्थान', ta: 'உங்கள் இடம்', te: 'మీ స్థానం', bn: 'আপনার অবস্থান' },
@@ -61,6 +62,40 @@ function getCurrentSeason() {
     }
     return null;
 }
+
+const WeatherSkeleton = () => (
+  <div className="flex flex-col items-center space-y-4 text-center">
+    <div className="flex items-center">
+      <Skeleton className="h-16 w-16 rounded-full" />
+      <Skeleton className="h-12 w-24 ml-2" />
+    </div>
+    <Skeleton className="h-6 w-32" />
+    <div className="w-full grid grid-cols-3 gap-2 text-sm text-muted-foreground pt-4 border-t">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex flex-col items-center gap-1">
+              <Skeleton className="h-5 w-5" />
+              <Skeleton className="h-4 w-12 mt-1" />
+              <Skeleton className="h-5 w-16 mt-1" />
+          </div>
+        ))}
+    </div>
+  </div>
+);
+
+const CropCardSkeleton = () => (
+  <Card className="flex flex-col overflow-hidden">
+    <CardHeader className="p-0">
+      <Skeleton className="h-48 w-full" />
+    </CardHeader>
+    <CardContent className="flex-grow p-4">
+      <Skeleton className="h-6 w-3/4 mb-2" />
+      <Skeleton className="h-4 w-1/2" />
+    </CardContent>
+    <CardFooter className="p-4 pt-0">
+      <Skeleton className="h-10 w-full" />
+    </CardFooter>
+  </Card>
+);
 
 export default function Dashboard() {
   const [location, setLocation] = useState<string | null>(null);
@@ -191,11 +226,11 @@ export default function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
+            <div className="flex-grow">
                 {isLoadingLocation ? (
                 <div className="flex items-center space-x-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>{t(translations.detecting)}</span>
+                    <Skeleton className="h-5 w-5 rounded-full" />
+                    <Skeleton className="h-5 w-48" />
                 </div>
                 ) : weather ? (
                 <p className="text-lg font-semibold">{weather.location.name}, {weather.location.region}, {weather.location.country}</p>
@@ -204,7 +239,7 @@ export default function Dashboard() {
                 )}
             </div>
             <Button onClick={() => setIsLocationDialogOpen(true)} variant="outline" className="w-full sm:w-auto flex-shrink-0">
-                <MapPin className="mr-2 h-4 w-4" />
+                <Edit className="mr-2 h-4 w-4" />
                 {weather ? t(translations.changeLocation) : t(translations.manualLocation)}
             </Button>
         </CardContent>
@@ -232,21 +267,17 @@ export default function Dashboard() {
               {weather && <CardDescription>{weather.location.name}, {weather.location.country}</CardDescription>}
             </CardHeader>
             <CardContent>
-              {isFetchingWeather && (
-                <div className="flex h-48 items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              )}
-              {weatherError && (
+              {isFetchingWeather ? (
+                <WeatherSkeleton />
+              ) : weatherError ? (
                 <Alert variant="destructive">
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{weatherError}</AlertDescription>
                 </Alert>
-              )}
-              {weather && (
+              ) : weather ? (
                 <div className="flex flex-col items-center space-y-4 text-center">
                   <div className="flex items-center">
-                    <Image src={`https:${weather.current.condition.icon}`} alt={weather.current.condition.text} width={64} height={64} />
+                    <Image src={`https:${weather.current.condition.icon}`} alt={weather.current.condition.text} width={64} height={64} unoptimized />
                     <div className="text-5xl font-bold">{Math.round(weather.current.temp_c)}°C</div>
                   </div>
                   <p className="font-semibold text-lg">{weather.current.condition.text}</p>
@@ -268,8 +299,7 @@ export default function Dashboard() {
                       </div>
                   </div>
                 </div>
-              )}
-              {!location && !isFetchingWeather && !weatherError && (
+              ) : (
                 <p className="py-8 text-center text-muted-foreground">{t(translations.enterLocationPrompt)}</p>
               )}
             </CardContent>
@@ -280,7 +310,7 @@ export default function Dashboard() {
         <div className="md:col-span-2">
           <Card>
              <CardHeader>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <CardTitle>{t(translations.cropRecommendations)}</CardTitle>
                         {currentSeasonInfo ? (
@@ -292,9 +322,9 @@ export default function Dashboard() {
                                 <CardDescription>Based on your location and current season.</CardDescription>
                             )}
                     </div>
-                     <div className="w-48">
+                     <div className="w-full sm:w-48">
                         <Select value={selectedSoilType} onValueChange={setSelectedSoilType}>
-                            <SelectTrigger id="soil-type-filter">
+                            <SelectTrigger id="soil-type-filter" className="w-full">
                                 <SelectValue placeholder={t(translations.filterBySoil)} />
                             </SelectTrigger>
                             <SelectContent>
@@ -307,12 +337,13 @@ export default function Dashboard() {
                 </div>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
-              {isLoadingCrops && <div className="col-span-full flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>}
-              {cropsError && <p className="col-span-full text-destructive">Error loading crops.</p>}
-              {recommendedCrops.map(crop => (
-                <CropCard key={crop.id} crop={crop} />
-              ))}
-               {!isLoadingCrops && recommendedCrops.length === 0 && (
+              {isLoadingCrops ? (
+                  [...Array(4)].map((_, i) => <CropCardSkeleton key={i} />)
+              ) : cropsError ? (
+                  <p className="col-span-full text-destructive">Error loading crops.</p>
+              ) : recommendedCrops.length > 0 ? (
+                  recommendedCrops.map(crop => <CropCard key={crop.id} crop={crop} />)
+              ) : (
                  <div className="col-span-full text-center text-muted-foreground py-16">
                     <p>No recommended crops found for the selected criteria this season.</p>
                  </div>
@@ -370,5 +401,3 @@ export default function Dashboard() {
     </>
   );
 }
-
-    
