@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, CloudRain, ThermometerSun, Snowflake, Lightbulb, Loader2 } from 'lucide-react';
+import Image from 'next/image';
+import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import CropCard from './crop-card';
 import VoiceReadoutButton from './voice-readout-button';
-import { crops, weatherAlerts, dailyTips } from '@/lib/data';
+import { crops, dailyTips } from '@/lib/data';
 import { useLanguage } from '@/context/language-context';
 
 const translations = {
@@ -17,33 +18,71 @@ const translations = {
   manualLocation: { en: 'Or enter manually (e.g., Pune, Maharashtra)', hi: 'या मैन्युअल रूप से दर्ज करें (जैसे, पुणे, महाराष्ट्र)', mr: 'किंवा व्यक्तिचलितपणे प्रविष्ट करा (उदा. पुणे, महाराष्ट्र)', ta: 'அல்லது கைமுறையாக உள்ளிடவும் (எ.கா., புனே, மகாராஷ்டிரா)', te: 'లేదా మానవీయంగా నమోదు చేయండి (ఉదా., పూణే, మహారాష్ట్ర)', bn: 'অথবা ম্যানুয়ালি প্রবেশ করুন (যেমন, পুনে, মহারাষ্ট্র)' },
   setLocation: { en: 'Set', hi: 'सेट करें', mr: 'सेट करा', ta: 'அமை', te: 'సెట్ చేయి', bn: 'সেট করুন' },
   dailyTip: { en: "Today's Tip", hi: 'आज का सुझाव', mr: 'आजची टीप', ta: 'இன்றைய குறிப்பு', te: 'ఈ రోజు చిట్కా', bn: 'আজকের টিপ' },
-  weatherAlerts: { en: 'Weather Alerts', hi: 'मौसम अलर्ट', mr: ' हवामान सूचना', ta: 'வானிலை எச்சரிக்கைகள்', te: 'వాతావరణ హెచ్చరికలు', bn: 'আবহাওয়ার সতর্কতা' },
   cropRecommendations: { en: 'Crop Recommendations', hi: 'फसल सुझाव', mr: 'पीक शिफारसी', ta: 'பயிர் பரிந்துரைகள்', te: 'పంట సిఫార్సులు', bn: 'ফসলের সুপারিশ' },
+  currentWeather: { en: 'Current Weather', hi: 'वर्तमान मौसम', mr: 'सध्याचे हवामान', ta: 'தற்போதைய வானிலை', te: 'ప్రస్తుత వాతావరణం', bn: 'বর্তমান আবহাওয়া' },
+  feelsLike: { en: 'Feels like', hi: 'जैसा लगता है', mr: 'असे वाटते', ta: 'உணர்வது போல்', te: 'అనిపిస్తుంది', bn: 'অনুভব হচ্ছে' },
+  wind: { en: 'Wind', hi: 'हवा', mr: 'वारा', ta: 'காற்று', te: 'గాలి', bn: 'বায়ু' },
+  humidity: { en: 'Humidity', hi: 'नमी', mr: 'आर्द्रता', ta: 'ஈரப்பதம்', te: 'తేమ', bn: 'আর্দ্রতা' },
+  enterLocationPrompt: { en: 'Enter a location to see the weather.', hi: 'मौसम देखने के लिए एक स्थान दर्ज करें।', mr: 'हवामान पाहण्यासाठी स्थान प्रविष्ट करा.', ta: 'வானிலையைப் பார்க்க ஒரு இடத்தைப் உள்ளிடவும்.', te: 'వాతావరణం చూడటానికి ఒక స్థానాన్ని నమోదు చేయండి.', bn: 'আবহাওয়া দেখতে একটি অবস্থান লিখুন।' },
+  couldNotDetectLocation: { en: 'Your location could not be automatically detected. Please enter it manually.', hi: 'आपके स्थान का स्वचालित रूप से पता नहीं लगाया जा सका। कृपया इसे मैन्युअल रूप से दर्ज करें।', mr: 'तुमचे स्थान आपोआप शोधले जाऊ शकले नाही. कृपया ते व्यक्तिचलितपणे प्रविष्ट करा.', ta: 'உங்கள் இருப்பிடத்தை தானாக கண்டறிய முடியவில்லை. தயவுசெய்து அதை கைமுறையாக உள்ளிடவும்.', te: 'మీ స్థానం స్వయంచాలకంగా గుర్తించబడలేదు. దయచేసి దాన్ని మాన్యువల్‌గా నమోదు చేయండి.', bn: 'আপনার অবস্থান স্বয়ংক্রিয়ভাবে সনাক্ত করা যায়নি। অনুগ্রহ করে এটি ম্যানুয়ালি প্রবেশ করান।' },
 };
 
 export default function Dashboard() {
   const [location, setLocation] = useState<string | null>(null);
   const [manualLocation, setManualLocation] = useState('');
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const [weather, setWeather] = useState<any>(null);
+  const [isFetchingWeather, setIsFetchingWeather] = useState(false);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
   const { t } = useLanguage();
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        // In a real app, we'd use position.coords.latitude and position.coords.longitude
-        // to get a location name via a reverse geocoding API.
-        // For this demo, we'll just set a mock location.
-        setLocation('Pune, Maharashtra');
+        const { latitude, longitude } = position.coords;
+        setLocation(`${latitude},${longitude}`);
         setIsLoadingLocation(false);
       },
       () => {
-        // Handle error or user denial
         setIsLoadingLocation(false);
-        setLocation(null); // Fallback to manual input
       },
       { timeout: 10000 }
     );
   }, []);
+
+  useEffect(() => {
+    if (location) {
+      const fetchWeather = async () => {
+        setIsFetchingWeather(true);
+        setWeatherError(null);
+        setWeather(null);
+        try {
+          const apiKey = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
+          if (!apiKey) {
+            setWeatherError("Weather API key is not configured.");
+            return;
+          }
+          const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location}`);
+          if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData?.error?.message || 'Failed to fetch weather data.');
+          }
+          const data = await res.json();
+          setWeather(data);
+        } catch (error) {
+          console.error(error);
+          if (error instanceof Error) {
+            setWeatherError(error.message);
+          } else {
+            setWeatherError('An unknown error occurred.');
+          }
+        } finally {
+          setIsFetchingWeather(false);
+        }
+      };
+      fetchWeather();
+    }
+  }, [location]);
 
   const handleManualLocation = () => {
     if (manualLocation.trim()) {
@@ -51,15 +90,6 @@ export default function Dashboard() {
     }
   };
   
-  const getAlertIcon = (type: string) => {
-    switch (type) {
-      case 'rain': return <CloudRain className="h-4 w-4" />;
-      case 'heatwave': return <ThermometerSun className="h-4 w-4" />;
-      case 'frost': return <Snowflake className="h-4 w-4" />;
-      default: return null;
-    }
-  };
-
   const dailyTip = dailyTips[0];
 
   return (
@@ -78,24 +108,28 @@ export default function Dashboard() {
               <Loader2 className="h-4 w-4 animate-spin" />
               <span>{t(translations.detecting)}</span>
             </div>
-          ) : location ? (
-            <p className="text-lg font-semibold">{location}</p>
+          ) : weather ? (
+            <p className="text-lg font-semibold">{weather.location.name}, {weather.location.country}</p>
           ) : (
-             <div className="flex w-full max-w-sm items-center space-x-2">
-              <Input
-                type="text"
-                placeholder={t(translations.manualLocation)}
-                value={manualLocation}
-                onChange={(e) => setManualLocation(e.target.value)}
-              />
-              <Button onClick={handleManualLocation}>{t(translations.setLocation)}</Button>
+             <div className="flex w-full max-w-sm flex-col items-start space-y-2">
+                <div className="flex w-full items-center space-x-2">
+                    <Input
+                        type="text"
+                        placeholder={t(translations.manualLocation)}
+                        value={manualLocation}
+                        onChange={(e) => setManualLocation(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleManualLocation()}
+                    />
+                    <Button onClick={handleManualLocation}>{t(translations.setLocation)}</Button>
+                </div>
+                {!location && <p className="text-sm text-muted-foreground">{t(translations.couldNotDetectLocation)}</p>}
             </div>
           )}
         </CardContent>
       </Card>
       
       <div className="grid gap-8 md:grid-cols-3">
-        {/* Daily Tip and Weather Alerts */}
+        {/* Daily Tip and Weather */}
         <div className="space-y-8 md:col-span-1">
            <Card>
             <CardHeader>
@@ -112,16 +146,50 @@ export default function Dashboard() {
           
           <Card>
             <CardHeader>
-              <CardTitle>{t(translations.weatherAlerts)}</CardTitle>
+              <CardTitle>{t(translations.currentWeather)}</CardTitle>
+              {weather && <CardDescription>{weather.location.name}, {weather.location.country}</CardDescription>}
             </CardHeader>
-            <CardContent className="space-y-4">
-              {weatherAlerts.map(alert => (
-                 <Alert key={alert.id} variant={alert.type === 'heatwave' ? 'destructive' : 'default'}>
-                  {getAlertIcon(alert.type)}
-                  <AlertTitle>{t(alert.title)}</AlertTitle>
-                  <AlertDescription>{t(alert.message)}</AlertDescription>
+            <CardContent>
+              {isFetchingWeather && (
+                <div className="flex h-48 items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              )}
+              {weatherError && (
+                <Alert variant="destructive">
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{weatherError}</AlertDescription>
                 </Alert>
-              ))}
+              )}
+              {weather && (
+                <div className="flex flex-col items-center space-y-4 text-center">
+                  <div className="flex items-center">
+                    <Image src={`https:${weather.current.condition.icon}`} alt={weather.current.condition.text} width={64} height={64} />
+                    <div className="text-5xl font-bold">{Math.round(weather.current.temp_c)}°C</div>
+                  </div>
+                  <p className="font-semibold text-lg">{weather.current.condition.text}</p>
+                  <div className="w-full grid grid-cols-3 gap-2 text-sm text-muted-foreground pt-4 border-t">
+                      <div className="flex flex-col items-center gap-1">
+                          <ThermometerSun className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-xs">{t(translations.feelsLike)}</span>
+                          <b className="font-bold text-foreground">{Math.round(weather.current.feelslike_c)}°C</b>
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
+                          <Wind className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-xs">{t(translations.wind)}</span>
+                          <b className="font-bold text-foreground">{weather.current.wind_kph} km/h</b>
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
+                          <Droplets className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-xs">{t(translations.humidity)}</span>
+                          <b className="font-bold text-foreground">{weather.current.humidity}%</b>
+                      </div>
+                  </div>
+                </div>
+              )}
+              {!location && !isFetchingWeather && !weatherError && (
+                <p className="py-8 text-center text-muted-foreground">{t(translations.enterLocationPrompt)}</p>
+              )}
             </CardContent>
           </Card>
         </div>
