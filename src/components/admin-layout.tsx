@@ -2,8 +2,8 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarContent, SidebarHeader, SidebarInset } from '@/components/ui/sidebar';
-import { Sprout, Shield, Tractor, Thermometer, Droplets, Wheat, Settings, BookOpen } from 'lucide-react';
+import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarContent, SidebarHeader, SidebarInset, SidebarFooter, SidebarSeparator } from '@/components/ui/sidebar';
+import { Sprout, Home, Tractor, Droplets, Wheat, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { Header } from './header';
 
@@ -12,9 +12,6 @@ const adminNavItems = [
     { href: '/admin/crops', icon: <Wheat />, label: 'Crops' },
     { href: '/admin/weather', icon: <Droplets />, label: 'Weather Alerts' },
     { href: '/admin/tips', icon: <BookOpen />, label: 'Farming Tips' },
-    // { href: '/admin/seasons', icon: <Thermometer />, label: 'Seasons' },
-    // { href: '/admin/schemes', icon: <Shield />, label: 'Govt. Schemes' },
-    // { href: '/admin/settings', icon: <Settings />, label: 'Settings' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -53,6 +50,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         ))}
                     </SidebarMenu>
                 </SidebarContent>
+                <SidebarSeparator />
+                <SidebarFooter>
+                     <SidebarMenu>
+                        <SidebarMenuItem>
+                            <Link href="/" passHref>
+                                <SidebarMenuButton>
+                                    <Home />
+                                    <span>Back to App</span>
+                                </SidebarMenuButton>
+                            </Link>
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+                </SidebarFooter>
             </Sidebar>
             <SidebarInset>
                 <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
