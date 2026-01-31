@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Volume2, Loader2, Play, Pause } from 'lucide-react';
+import { Volume2, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/language-context';
 
@@ -22,21 +22,29 @@ export default function VoiceReadoutButton({ textToRead }: VoiceReadoutButtonPro
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const { language } = useLanguage();
 
   useEffect(() => {
-    setIsSupported(typeof window !== 'undefined' && 'speechSynthesis' in window);
-    
-    const handleSpeechEnd = () => {
-      setIsSpeaking(false);
-      setIsPaused(false);
+    const checkSupport = () => {
+      const supported = typeof window !== 'undefined' && 'speechSynthesis' in window;
+      setIsSupported(supported);
+      return supported;
     };
 
-    window.speechSynthesis.addEventListener('end', handleSpeechEnd);
-    return () => {
-      window.speechSynthesis.removeEventListener('end', handleSpeechEnd);
-      window.speechSynthesis.cancel();
-    };
+    if (checkSupport()) {
+      const loadVoices = () => {
+        setVoices(window.speechSynthesis.getVoices());
+      };
+      
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+
+      return () => {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.onvoiceschanged = null;
+      };
+    }
   }, []);
 
   const handleSpeak = () => {
@@ -54,7 +62,26 @@ export default function VoiceReadoutButton({ textToRead }: VoiceReadoutButtonPro
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(textToRead);
       utterance.lang = langToLocale[language] || 'en-US';
+
+      // Find a female voice
+      const femaleVoices = voices.filter(
+        (voice) => voice.lang.startsWith(language) && /female/i.test(voice.name)
+      );
       
+      let voiceToUse = femaleVoices[0];
+
+      if (!voiceToUse) {
+        // Fallback to any voice for the language that is not explicitly male
+         const otherVoices = voices.filter(
+            (voice) => voice.lang.startsWith(language) && !/male/i.test(voice.name)
+         );
+         voiceToUse = otherVoices[0];
+      }
+      
+      if(voiceToUse) {
+        utterance.voice = voiceToUse;
+      }
+
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => {
         setIsSpeaking(false);
