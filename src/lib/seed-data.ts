@@ -1,12 +1,5 @@
 
 import { Crop, WeatherAlert, FarmingTip, CropLifecycle, State, Season } from './types';
-import { PlaceHolderImages } from './placeholder-images';
-
-const imageMap = new Map(PlaceHolderImages.map(img => [img.id, img.imageUrl]));
-
-const getImage = (id: string) => {
-    return imageMap.get(id) || `https://placehold.co/600x400/CCCCCC/FFFFFF?text=${id.replace('-', '+')}`;
-}
 
 export const states: State[] = [
   { id: 'haryana', name: 'Haryana', climateZone: 'Subtropical' },
@@ -49,7 +42,7 @@ export const crops: Crop[] = [
     id: 'wheat-haryana-rabi',
     nameEnglish: 'Wheat',
     nameLocal: 'गेहूं',
-    imageUrl: getImage('wheat'),
+    imageUrl: 'https://images.unsplash.com/photo-1514481043218-e965c5886f06?q=80&w=1080',
     supportedStateIds: ['haryana', 'punjab', 'uttar-pradesh'],
     suitableSeasonIds: ['rabi'],
     soilType: 'Loamy',
@@ -63,7 +56,7 @@ export const crops: Crop[] = [
     id: 'rice-westbengal-kharif',
     nameEnglish: 'Rice',
     nameLocal: 'चावल',
-    imageUrl: getImage('rice'),
+    imageUrl: 'https://images.unsplash.com/photo-1599328580087-15c9dab481f3?q=80&w=1080',
     supportedStateIds: ['west-bengal', 'punjab', 'andhra-pradesh'],
     suitableSeasonIds: ['kharif'],
     soilType: 'Clayey Loam',
@@ -77,7 +70,7 @@ export const crops: Crop[] = [
     id: 'maize-karnataka-kharif',
     nameEnglish: 'Maize (Corn)',
     nameLocal: 'मक्का',
-    imageUrl: getImage('corn'),
+    imageUrl: 'https://images.unsplash.com/photo-1551810080-3eb3be72d3f4?q=80&w=1080',
     supportedStateIds: ['karnataka', 'maharashtra', 'rajasthan'],
     suitableSeasonIds: ['kharif'],
     soilType: 'Red Loam',
@@ -91,7 +84,7 @@ export const crops: Crop[] = [
     id: 'sugarcane-maharashtra-annual',
     nameEnglish: 'Sugarcane',
     nameLocal: 'गन्ना',
-    imageUrl: getImage('sugarcane'),
+    imageUrl: 'https://images.unsplash.com/photo-1570295289045-885a6b13735b?q=80&w=1080',
     supportedStateIds: ['maharashtra', 'uttar-pradesh', 'karnataka'],
     suitableSeasonIds: ['kharif', 'rabi'], // Annual crop
     soilType: 'Heavy Loam',
@@ -105,7 +98,7 @@ export const crops: Crop[] = [
     id: 'cotton-gujarat-kharif',
     nameEnglish: 'Cotton',
     nameLocal: 'कपास',
-    imageUrl: getImage('cotton'),
+    imageUrl: 'https://images.unsplash.com/photo-1633527992904-53f86f81a23a?q=80&w=1080',
     supportedStateIds: ['gujarat', 'maharashtra', 'telangana'],
     suitableSeasonIds: ['kharif'],
     soilType: 'Black Cotton Soil',
@@ -119,7 +112,7 @@ export const crops: Crop[] = [
     id: 'mustard-rajasthan-rabi',
     nameEnglish: 'Mustard',
     nameLocal: 'सरसों',
-    imageUrl: getImage('mustard'),
+    imageUrl: 'https://images.unsplash.com/photo-1421930866250-aa0594cea05c?q=80&w=1080',
     supportedStateIds: ['rajasthan', 'haryana', 'uttar-pradesh'],
     suitableSeasonIds: ['rabi'],
     soilType: 'Sandy Loam',
@@ -133,7 +126,7 @@ export const crops: Crop[] = [
     id: 'potato-uttarpradesh-rabi',
     nameEnglish: 'Potato',
     nameLocal: 'आलू',
-    imageUrl: getImage('potato'),
+    imageUrl: 'https://images.unsplash.com/photo-1590486803833-1c58779c5683?q=80&w=1080',
     supportedStateIds: ['uttar-pradesh', 'west-bengal', 'punjab'],
     suitableSeasonIds: ['rabi'],
     soilType: 'Well-drained Sandy Loam',
@@ -147,7 +140,7 @@ export const crops: Crop[] = [
     id: 'soybean-maharashtra-kharif',
     nameEnglish: 'Soybean',
     nameLocal: 'सोयाबीन',
-    imageUrl: getImage('soybean'),
+    imageUrl: 'https://images.unsplash.com/photo-1553786193-39908a834b69?q=80&w=1080',
     supportedStateIds: ['maharashtra', 'madhya-pradesh'],
     suitableSeasonIds: ['kharif'],
     soilType: 'Clay Loam',
@@ -161,7 +154,7 @@ export const crops: Crop[] = [
     id: 'groundnut-gujarat-kharif',
     nameEnglish: 'Groundnut',
     nameLocal: 'मूंगफली',
-    imageUrl: getImage('groundnut'),
+    imageUrl: 'https://images.unsplash.com/photo-1594280387556-0026332152bd?q=80&w=1080',
     supportedStateIds: ['gujarat', 'andhra-pradesh', 'karnataka'],
     suitableSeasonIds: ['kharif', 'rabi'],
     soilType: 'Sandy Loam',
@@ -175,7 +168,7 @@ export const crops: Crop[] = [
     id: 'chickpea-rajasthan-rabi',
     nameEnglish: 'Chickpea (Gram)',
     nameLocal: 'चना',
-    imageUrl: getImage('chickpea'),
+    imageUrl: 'https://images.unsplash.com/photo-1625993791283-913a8a364b6a?q=80&w=1080',
     supportedStateIds: ['rajasthan', 'madhya-pradesh', 'maharashtra'],
     suitableSeasonIds: ['rabi'],
     soilType: 'Light to Heavy Clay',

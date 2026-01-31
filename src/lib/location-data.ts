@@ -4,17 +4,23 @@ export interface LocationData {
 }
 
 export const locationData: LocationData = {
-  "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore"],
-  "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot"],
-  "Haryana": ["Faridabad", "Gurugram", "Panipat", "Ambala"],
-  "Karnataka": ["Bengaluru", "Mysuru", "Hubli", "Mangaluru"],
-  "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior"],
-  "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik"],
-  "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala"],
-  "Rajasthan": ["Jaipur", "Jodhpur", "Kota", "Bikaner"],
-  "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"],
-  "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra"],
-  "West Bengal": ["Kolkata", "Asansol", "Siliguri", "Durgapur"],
+  "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Tirupati", "Kurnool"],
+  "Assam": ["Guwahati", "Dibrugarh", "Silchar", "Jorhat"],
+  "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur"],
+  "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba"],
+  "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar"],
+  "Haryana": ["Faridabad", "Gurugram", "Panipat", "Ambala", "Hisar"],
+  "Karnataka": ["Bengaluru", "Mysuru", "Hubli", "Mangaluru", "Belagavi"],
+  "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur"],
+  "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain"],
+  "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad"],
+  "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Puri"],
+  "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda"],
+  "Rajasthan": ["Jaipur", "Jodhpur", "Kota", "Bikaner", "Udaipur"],
+  "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli"],
+  "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Secunderabad"],
+  "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Meerut"],
+  "West Bengal": ["Kolkata", "Asansol", "Siliguri", "Durgapur", "Howrah"],
 };
 
 export const statesList = Object.keys(locationData);
