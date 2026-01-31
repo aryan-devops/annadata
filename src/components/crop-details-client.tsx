@@ -50,12 +50,18 @@ export default function CropDetailsClient({ crop, cropLifecycle, keyInfo, iconMa
     return (
         <div className="container mx-auto px-4 py-8">
             <header className="mb-8">
+                {/*
+                  FIX: The parent div has `relative` and a fixed height `h-64`.
+                  The inline style for object-fit has been replaced with the `object-cover` Tailwind class.
+                  This creates a robust container for the hero image.
+                */}
                 <div className="relative mb-4 h-64 w-full overflow-hidden rounded-lg shadow-lg">
                     <Image
                         src={crop.imageUrl}
                         alt={cropName}
                         fill
-                        style={{ objectFit: 'cover' }}
+                        className="object-cover"
+                        sizes="100vw"
                         priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
