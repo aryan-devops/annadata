@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Sprout } from 'lucide-react';
+import { Sprout, Shield } from 'lucide-react';
 import { LanguageSwitcher } from './language-switcher';
+import { Button } from './ui/button';
 
 export function Header() {
   return (
@@ -16,6 +17,12 @@ export function Header() {
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
           <LanguageSwitcher />
+          <Button asChild variant="ghost" size="icon">
+            <Link href="/admin">
+              <Shield className="h-[1.2rem] w-[1.2rem]" />
+              <span className="sr-only">Admin Panel</span>
+            </Link>
+          </Button>
         </div>
       </div>
     </header>
