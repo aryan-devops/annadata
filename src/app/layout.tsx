@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { Header } from '@/components/header';
 import { LanguageProvider } from '@/context/language-context';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
+import AdminLayout from '@/components/admin-layout';
 
 export const metadata: Metadata = {
   title: 'Annadata AI',
@@ -25,13 +26,12 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <LanguageProvider>
-          <div className="relative flex min-h-screen w-full flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-          </div>
-          <Toaster />
-        </LanguageProvider>
+        <FirebaseClientProvider>
+          <LanguageProvider>
+              <AdminLayout>{children}</AdminLayout>
+            <Toaster />
+          </LanguageProvider>
+        </FirebaseClientProvider>
       </body>
     </html>
   );

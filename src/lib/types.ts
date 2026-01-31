@@ -4,31 +4,20 @@ export type Translations = {
   [key: string]: string;
 };
 
-export type Crop = {
+export interface Crop {
   id: string;
-  name: Translations;
-  image: string;
-  soilType: Translations;
-  temperature: string;
-  rainfall: string;
-  yieldPerAcre: Translations;
-  marketPrice: Translations;
-  sowingTime: Translations;
-  seedRate: Translations;
-  fertilizerSchedule: {
-    stage: Translations;
-    details: Translations;
-  }[];
-  pesticideGuide: {
-    pest: Translations;
-    solution: Translations;
-  }[];
-  irrigationSchedule: {
-    stage: Translations;
-    frequency: Translations;
-  }[];
-  harvestingTime: Translations;
-};
+  nameEnglish: string;
+  nameLocal: string;
+  imageUrl: string;
+  supportedStateIds: string[];
+  suitableSeasonIds: string[];
+  soilType: string;
+  idealTemperature: string;
+  idealRainfall: string;
+  expectedYield: number;
+  approximateMarketPrice: number;
+  isVisible: boolean;
+}
 
 export type WeatherAlert = {
   id: string;

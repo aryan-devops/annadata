@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -9,8 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import CropCard from './crop-card';
 import VoiceReadoutButton from './voice-readout-button';
-import { crops, dailyTips } from '@/lib/data';
 import { useLanguage } from '@/context/language-context';
+import { useFirestore, useMemoFirebase } from '@/firebase/provider';
+import { collection } from 'firebase/firestore';
+import { useCollection } from '@/firebase/firestore/use-collection';
+import type { Crop } from '@/lib/types';
 
 const translations = {
   location: { en: 'Your Location', hi: 'आपका स्थान', mr: 'तुमचे स्थान', ta: 'உங்கள் இடம்', te: 'మీ స్థానం', bn: 'আপনার অবস্থান' },
@@ -35,6 +39,10 @@ export default function Dashboard() {
   const [isFetchingWeather, setIsFetchingWeather] = useState(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const { t } = useLanguage();
+
+  const firestore = useFirestore();
+  const cropsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'crops'): null, [firestore]);
+  const { data: crops, isLoading: isLoadingCrops, error: cropsError } = useCollection<Crop>(cropsCollectionRef);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -90,7 +98,14 @@ export default function Dashboard() {
     }
   };
   
-  const dailyTip = dailyTips[0];
+  const dailyTipText = t({
+      en: "Check soil moisture before irrigating your crops to avoid overwatering.",
+      hi: "पानी की अधिकता से बचने के लिए अपनी फसलों की सिंचाई करने से पहले मिट्टी की नमी की जाँच करें।",
+      mr: "जास्त पाणी देणे टाळण्यासाठी आपल्या पिकांना पाणी देण्यापूर्वी जमिनीतील ओलावा तपासा.",
+      ta: "அதிக நீர் பாய்ச்சுவதைத் தவிர்க்க, உங்கள் பயிர்களுக்கு நீர்ப்பாசனம் செய்வதற்கு முன் மண்ணின் ஈரப்பதத்தைச் சரிபார்க்கவும்.",
+      te: "అధిక నీటిపారుదలని నివారించడానికి మీ పంటలకు నీటిపారుదల చేసే ముందు నేల తేమను తనిఖీ చేయండి.",
+      bn: "অতিরিক্ত জল দেওয়া এড়াতে আপনার ফসলে জল দেওয়ার আগে মাটির আর্দ্রতা পরীক্ষা করুন।",
+  });
 
   return (
     <div className="space-y-8">
@@ -139,8 +154,8 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">{t(dailyTip.tip)}</p>
-              <VoiceReadoutButton textToRead={t(dailyTip.tip)} />
+              <p className="mb-4">{dailyTipText}</p>
+              <VoiceReadoutButton textToRead={dailyTipText} />
             </CardContent>
           </Card>
           
@@ -202,7 +217,9 @@ export default function Dashboard() {
               <CardDescription>Based on your location and current season.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
-              {crops.map(crop => (
+              {isLoadingCrops && <div className="col-span-full flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>}
+              {cropsError && <p className="col-span-full text-destructive">Error loading crops.</p>}
+              {crops?.filter(c => c.isVisible).map(crop => (
                 <CropCard key={crop.id} crop={crop} />
               ))}
             </CardContent>

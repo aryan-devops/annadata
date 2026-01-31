@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Crop } from '@/lib/types';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useLanguage } from '@/context/language-context';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,28 +16,26 @@ const translations = {
 };
 
 export default function CropCard({ crop }: CropCardProps) {
-  const { t } = useLanguage();
-  const placeholder = PlaceHolderImages.find(p => p.id === crop.image);
+  const { language, t } = useLanguage();
+  
+  const cropName = language === 'hi' && crop.nameLocal ? crop.nameLocal : crop.nameEnglish;
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg">
       <CardHeader className="p-0">
         <div className="relative h-48 w-full">
-          {placeholder && (
-            <Image
-              src={placeholder.imageUrl}
-              alt={t(crop.name)}
-              fill
-              style={{ objectFit: 'cover' }}
-              data-ai-hint={placeholder.imageHint}
-            />
-          )}
+          <Image
+            src={crop.imageUrl}
+            alt={cropName}
+            fill
+            className="object-cover"
+          />
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-4">
-        <CardTitle className="mb-2 text-xl font-bold font-headline">{t(crop.name)}</CardTitle>
+        <CardTitle className="mb-2 text-xl font-bold font-headline">{cropName}</CardTitle>
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">{t(translations.soil)}:</span> {t(crop.soilType)}
+          <span className="font-semibold">{t(translations.soil)}:</span> {crop.soilType}
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
