@@ -12,6 +12,7 @@ export const states: State[] = [
   { id: 'rajasthan', name: 'Rajasthan', climateZone: 'Arid' },
   { id: 'gujarat', name: 'Gujarat', climateZone: 'Arid' },
   { id: 'telangana', name: 'Telangana', climateZone: 'Tropical' },
+  { id: 'madhya-pradesh', name: 'Madhya Pradesh', climateZone: 'Subtropical'},
 ];
 
 export const seasons: Season[] = [
@@ -133,6 +134,48 @@ export const crops: Crop[] = [
     idealRainfall: '50-75 cm',
     expectedYield: 12000,
     approximateMarketPrice: 1500,
+    isVisible: true,
+  },
+  {
+    id: 'soybean-maharashtra-kharif',
+    nameEnglish: 'Soybean',
+    nameLocal: 'सोयाबीन',
+    imageUrl: 'https://images.unsplash.com/photo-1553786193-39908a834b69?q=80&w=1080',
+    supportedStateIds: ['maharashtra', 'madhya-pradesh'],
+    suitableSeasonIds: ['kharif'],
+    soilType: 'Clay Loam',
+    idealTemperature: '20-30°C',
+    idealRainfall: '60-75 cm',
+    expectedYield: 1000,
+    approximateMarketPrice: 4300,
+    isVisible: true,
+  },
+  {
+    id: 'groundnut-gujarat-kharif',
+    nameEnglish: 'Groundnut',
+    nameLocal: 'मूंगफली',
+    imageUrl: 'https://images.unsplash.com/photo-1594280387556-0026332152bd?q=80&w=1080',
+    supportedStateIds: ['gujarat', 'andhra-pradesh', 'karnataka'],
+    suitableSeasonIds: ['kharif', 'rabi'],
+    soilType: 'Sandy Loam',
+    idealTemperature: '25-35°C',
+    idealRainfall: '50-125 cm',
+    expectedYield: 1200,
+    approximateMarketPrice: 5850,
+    isVisible: true,
+  },
+  {
+    id: 'chickpea-rajasthan-rabi',
+    nameEnglish: 'Chickpea (Gram)',
+    nameLocal: 'चना',
+    imageUrl: 'https://images.unsplash.com/photo-1625993791283-913a8a364b6a?q=80&w=1080',
+    supportedStateIds: ['rajasthan', 'madhya-pradesh', 'maharashtra'],
+    suitableSeasonIds: ['rabi'],
+    soilType: 'Light to Heavy Clay',
+    idealTemperature: '15-25°C',
+    idealRainfall: '60-100 cm',
+    expectedYield: 800,
+    approximateMarketPrice: 4875,
     isVisible: true,
   },
 ];
@@ -312,6 +355,41 @@ export const cropLifecycles: CropLifecycle[] = [
         irrigationSchedule: 'Frequent light irrigations are needed. Maintain soil moisture. Critical stages are stolon formation and tuber development.',
         harvestingWindow: 'January to March',
         harvestingReadinessSigns: 'Haulms (stems) start to yellow and dry up.'
+    },
+    {
+        id: 'lc-soybean',
+        cropId: 'soybean-maharashtra-kharif',
+        sowingDateRange: 'Late June to early July',
+        seedRate: '25-30 kg/acre',
+        fertilizerBasalDose: '20 kg N, 60-80 kg P2O5, 20 kg K2O, and 20 kg Sulphur per acre',
+        fertilizerTopDressing: 'No top dressing generally required as it is a legume.',
+        diseasePesticideGuide: 'For Rust and Anthracnose, use Mancozeb. For Girdle Beetle, spray Triazophos.',
+        irrigationSchedule: 'Critical stages are flowering and pod filling. Irrigate if there is a long dry spell.',
+        harvestingWindow: 'October to November',
+        harvestingReadinessSigns: 'Leaves turn yellow and drop, pods become dry.'
+    },
+    {
+        id: 'lc-groundnut',
+        cropId: 'groundnut-gujarat-kharif',
+        sowingDateRange: 'June-July for Kharif, October-November for Rabi',
+        seedRate: '40-50 kg kernels/acre',
+        fertilizerBasalDose: 'Apply 10 tons of FYM. 10 kg N, 20 kg P2O5 per acre.',
+        fertilizerTopDressing: 'Apply Gypsum at 200 kg/acre during flowering.',
+        diseasePesticideGuide: 'For Tikka leaf spot, spray Carbendazim or Mancozeb. For aphids, use Imidacloprid.',
+        irrigationSchedule: 'Irrigation is crucial at pegging, flowering, and pod development stages.',
+        harvestingWindow: 'October-November for Kharif, February-March for Rabi',
+        harvestingReadinessSigns: 'Tops of plants yellow and wither. Pods are fully developed.'
+    },
+    {
+        id: 'lc-chickpea',
+        cropId: 'chickpea-rajasthan-rabi',
+        sowingDateRange: 'Late October to first week of November',
+        seedRate: '30-40 kg/acre for Desi type',
+        fertilizerBasalDose: '8 kg N and 16 kg P2O5 per acre.',
+        fertilizerTopDressing: 'Not required as it is a pulse crop.',
+        diseasePesticideGuide: 'For Wilt, use resistant varieties. For Pod Borer, spray Emamectin Benzoate.',
+        irrigationSchedule: 'One irrigation at pre-flowering and one at pod development stage if needed.',
+        harvestingWindow: 'February to March',
+        harvestingReadinessSigns: 'Leaves turn reddish-brown and start shedding.'
     }
 ];
-

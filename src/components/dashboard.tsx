@@ -14,7 +14,8 @@ import { useLanguage } from '@/context/language-context';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { collection } from 'firebase/firestore';
 import { useCollection } from '@/firebase/firestore/use-collection';
-import type { Crop, Season } from '@/lib/types';
+import type { Crop } from '@/lib/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const translations = {
   location: { en: 'Your Location', hi: 'आपका स्थान', mr: 'तुमचे स्थान', ta: 'உங்கள் இடம்', te: 'మీ స్థానం', bn: 'আপনার অবস্থান' },
@@ -30,6 +31,8 @@ const translations = {
   enterLocationPrompt: { en: 'Enter a location to see the weather.', hi: 'मौसम देखने के लिए एक स्थान दर्ज करें।', mr: 'हवामान पाहण्यासाठी स्थान प्रविष्ट करा.', ta: 'வானிலையைப் பார்க்க ஒரு இடத்தைப் உள்ளிடவும்.', te: 'వాతావరణం చూడటానికి ఒక స్థానాన్ని నమోదు చేయండి.', bn: 'আবহাওয়া দেখতে একটি অবস্থান লিখুন।' },
   couldNotDetectLocation: { en: 'Your location could not be automatically detected. Please enter it manually.', hi: 'आपके स्थान का स्वचालित रूप से पता नहीं लगाया जा सका। कृपया इसे मैन्युअल रूप से दर्ज करें।', mr: 'तुमचे स्थान आपोआप शोधले जाऊ शकले नाही. कृपया ते व्यक्तिचलितपणे प्रविष्ट करा.', ta: 'உங்கள் இருப்பிடத்தை தானாக கண்டறிய முடியவில்லை. தயவுசெய்து அதை கைமுறையாக உள்ளிடவும்.', te: 'మీ స్థానం స్వయంచాలకంగా గుర్తించబడలేదు. దయచేసి దాన్ని మాన్యువల్‌గా నమోదు చేయండి.', bn: 'আপনার অবস্থান স্বয়ংক্রিয়ভাবে সনাক্ত করা যায়নি। অনুগ্রহ করে এটি ম্যানুয়ালি প্রবেশ করান।' },
   basedOnSeason: { en: 'Based on the current season', hi: 'वर्तमान मौसम के आधार पर', mr: 'सध्याच्या हंगामावर आधारित', ta: 'தற்போதைய பருவத்தின் அடிப்படையில்', te: 'ప్రస్తుత సీజన్ ఆధారంగా', bn: 'বর্তমান মৌসুমের উপর ভিত্তি করে' },
+  filterBySoil: { en: 'Filter by soil type...', hi: 'मिट्टी के प्रकार से फ़िल्टर करें...', mr: 'मातीच्या प्रकारानुसार फिल्टर करा...', ta: 'மண் வகையின்படி வடிகட்டவும்...', te: 'నేల రకం ద్వారా ఫిల్టర్ చేయండి...', bn: 'মাটির ধরন অনুসারে ফিল্টার করুন...' },
+  allSoils: { en: 'All Soil Types', hi: 'सभी मिट्टी के प्रकार', mr: 'सर्व मातीचे प्रकार', ta: 'அனைத்து மண் வகைகள்', te: 'అన్ని నేల రకాలు', bn: 'সমস্ত মাটির প্রকার' },
 };
 
 const seasonDefinitions = [
@@ -37,6 +40,8 @@ const seasonDefinitions = [
     { id: 'rabi', name: 'Rabi', startMonth: 10, endMonth: 2 }, // Nov to Mar
     { id: 'zaid', name: 'Zaid', startMonth: 3, endMonth: 4 }, // Apr to May
 ];
+
+const soilTypes = [ 'All', 'Loamy', 'Clayey Loam', 'Red Loam', 'Heavy Loam', 'Black Cotton Soil', 'Sandy Loam', 'Light to Heavy Clay' ];
 
 function getCurrentSeason() {
     const currentMonth = new Date().getMonth();
@@ -62,6 +67,7 @@ export default function Dashboard() {
   const [weather, setWeather] = useState<any>(null);
   const [isFetchingWeather, setIsFetchingWeather] = useState(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
+  const [selectedSoilType, setSelectedSoilType] = useState('All');
   const { t } = useLanguage();
   const currentSeasonInfo = useMemo(getCurrentSeason, []);
 
@@ -71,10 +77,17 @@ export default function Dashboard() {
 
   const recommendedCrops = useMemo(() => {
     if (!crops || !currentSeasonInfo) return crops?.filter(c => c.isVisible) || [];
-    return crops.filter(crop =>
+    
+    let seasonCrops = crops.filter(crop =>
         crop.isVisible && crop.suitableSeasonIds.includes(currentSeasonInfo.id)
     );
-  }, [crops, currentSeasonInfo]);
+
+    if (selectedSoilType && selectedSoilType !== 'All') {
+        seasonCrops = seasonCrops.filter(crop => crop.soilType === selectedSoilType);
+    }
+    
+    return seasonCrops;
+  }, [crops, currentSeasonInfo, selectedSoilType]);
 
 
   useEffect(() => {
@@ -246,15 +259,31 @@ export default function Dashboard() {
         <div className="md:col-span-2">
           <Card>
              <CardHeader>
-              <CardTitle>{t(translations.cropRecommendations)}</CardTitle>
-               {currentSeasonInfo ? (
-                    <CardDescription className="flex items-center gap-2">
-                        <CalendarDays className="h-4 w-4" />
-                        <span>{t(translations.basedOnSeason)}: <span className="font-semibold text-primary">{currentSeasonInfo.name}</span></span>
-                    </CardDescription>
-                ) : (
-                    <CardDescription>Based on your location and current season.</CardDescription>
-                )}
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle>{t(translations.cropRecommendations)}</CardTitle>
+                        {currentSeasonInfo ? (
+                                <CardDescription className="flex items-center gap-2 mt-1">
+                                    <CalendarDays className="h-4 w-4" />
+                                    <span>{t(translations.basedOnSeason)}: <span className="font-semibold text-primary">{currentSeasonInfo.name}</span></span>
+                                </CardDescription>
+                            ) : (
+                                <CardDescription>Based on your location and current season.</CardDescription>
+                            )}
+                    </div>
+                     <div className="w-48">
+                        <Select value={selectedSoilType} onValueChange={setSelectedSoilType}>
+                            <SelectTrigger id="soil-type-filter">
+                                <SelectValue placeholder={t(translations.filterBySoil)} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {soilTypes.map(soil => (
+                                    <SelectItem key={soil} value={soil}>{soil === 'All' ? t(translations.allSoils) : soil}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
               {isLoadingCrops && <div className="col-span-full flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>}
@@ -262,6 +291,11 @@ export default function Dashboard() {
               {recommendedCrops.map(crop => (
                 <CropCard key={crop.id} crop={crop} />
               ))}
+               {!isLoadingCrops && recommendedCrops.length === 0 && (
+                 <div className="col-span-full text-center text-muted-foreground py-16">
+                    <p>No recommended crops found for the selected soil type this season.</p>
+                 </div>
+               )}
             </CardContent>
           </Card>
         </div>
