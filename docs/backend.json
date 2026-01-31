@@ -1,0 +1,542 @@
+{
+  "entities": {
+    "Crop": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Crop",
+      "type": "object",
+      "description": "Represents a crop with its properties and characteristics.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Crop entity."
+        },
+        "nameEnglish": {
+          "type": "string",
+          "description": "English name of the crop."
+        },
+        "nameLocal": {
+          "type": "string",
+          "description": "Local language name of the crop."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the crop image.",
+          "format": "uri"
+        },
+        "supportedStateIds": {
+          "type": "array",
+          "description": "References to Supported States. (Relationship: State N:N Crop)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "suitableSeasonIds": {
+          "type": "array",
+          "description": "References to Suitable Seasons. (Relationship: Season N:N Crop)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "soilType": {
+          "type": "string",
+          "description": "Suitable soil type for the crop."
+        },
+        "idealTemperature": {
+          "type": "string",
+          "description": "Ideal temperature range for the crop."
+        },
+        "idealRainfall": {
+          "type": "string",
+          "description": "Ideal rainfall range for the crop."
+        },
+        "expectedYield": {
+          "type": "number",
+          "description": "Expected yield per acre of the crop."
+        },
+        "approximateMarketPrice": {
+          "type": "number",
+          "description": "Approximate market price of the crop."
+        },
+        "isVisible": {
+          "type": "boolean",
+          "description": "Indicates whether the crop is visible to farmers."
+        }
+      },
+      "required": [
+        "id",
+        "nameEnglish",
+        "nameLocal",
+        "imageUrl",
+        "supportedStateIds",
+        "suitableSeasonIds",
+        "soilType",
+        "idealTemperature",
+        "idealRainfall",
+        "expectedYield",
+        "approximateMarketPrice",
+        "isVisible"
+      ]
+    },
+    "State": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "State",
+      "type": "object",
+      "description": "Represents a state or region.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the State entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the state."
+        },
+        "climateZone": {
+          "type": "string",
+          "description": "Climate zone of the state."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "climateZone"
+      ]
+    },
+    "Season": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Season",
+      "type": "object",
+      "description": "Represents a season.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Season entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the season (e.g., Kharif, Rabi)."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "Start date of the season.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "End date of the season.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "startDate",
+        "endDate"
+      ]
+    },
+    "CropLifecycle": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CropLifecycle",
+      "type": "object",
+      "description": "Represents the lifecycle details for a specific crop.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the CropLifecycle entity."
+        },
+        "cropId": {
+          "type": "string",
+          "description": "Reference to Crop. (Relationship: Crop 1:N CropLifecycle)"
+        },
+        "sowingDateRange": {
+          "type": "string",
+          "description": "Best sowing date range for the crop."
+        },
+        "seedRate": {
+          "type": "string",
+          "description": "Seed rate per acre for the crop."
+        },
+        "fertilizerBasalDose": {
+          "type": "string",
+          "description": "Fertilizer basal dose details."
+        },
+        "fertilizerTopDressing": {
+          "type": "string",
+          "description": "Fertilizer top dressing details."
+        },
+        "diseasePesticideGuide": {
+          "type": "string",
+          "description": "Guide for disease and pesticide management."
+        },
+        "irrigationSchedule": {
+          "type": "string",
+          "description": "Irrigation schedule details."
+        },
+        "harvestingWindow": {
+          "type": "string",
+          "description": "Harvesting window details."
+        },
+        "harvestingReadinessSigns": {
+          "type": "string",
+          "description": "Visual signs of harvesting readiness."
+        }
+      },
+      "required": [
+        "id",
+        "cropId",
+        "sowingDateRange",
+        "seedRate",
+        "fertilizerBasalDose",
+        "fertilizerTopDressing",
+        "diseasePesticideGuide",
+        "irrigationSchedule",
+        "harvestingWindow",
+        "harvestingReadinessSigns"
+      ]
+    },
+    "WeatherAlert": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "WeatherAlert",
+      "type": "object",
+      "description": "Represents a weather alert.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the WeatherAlert entity."
+        },
+        "thresholdRain": {
+          "type": "number",
+          "description": "Rainfall threshold (mm)."
+        },
+        "thresholdTemperatureMin": {
+          "type": "number",
+          "description": "Minimum temperature threshold."
+        },
+        "thresholdTemperatureMax": {
+          "type": "number",
+          "description": "Maximum temperature threshold."
+        },
+        "frostRisk": {
+          "type": "boolean",
+          "description": "Indicates frost risk."
+        },
+        "alertMessage": {
+          "type": "string",
+          "description": "Alert message to display."
+        },
+        "recommendedActions": {
+          "type": "string",
+          "description": "Recommended actions for the alert."
+        },
+        "isEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether the alert is enabled."
+        }
+      },
+      "required": [
+        "id",
+        "thresholdRain",
+        "thresholdTemperatureMin",
+        "thresholdTemperatureMax",
+        "frostRisk",
+        "alertMessage",
+        "recommendedActions",
+        "isEnabled"
+      ]
+    },
+    "Translation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Translation",
+      "type": "object",
+      "description": "Represents a translated text.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Translation entity."
+        },
+        "key": {
+          "type": "string",
+          "description": "Key for the translated text."
+        },
+        "language": {
+          "type": "string",
+          "description": "Language of the translation (e.g., Hindi, English)."
+        },
+        "text": {
+          "type": "string",
+          "description": "Translated text."
+        }
+      },
+      "required": [
+        "id",
+        "key",
+        "language",
+        "text"
+      ]
+    },
+    "FarmingTip": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "FarmingTip",
+      "type": "object",
+      "description": "Represents a daily farming tip.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the FarmingTip entity."
+        },
+        "tipText": {
+          "type": "string",
+          "description": "Text of the farming tip."
+        },
+        "language": {
+          "type": "string",
+          "description": "Language of the tip."
+        },
+        "scheduledDate": {
+          "type": "string",
+          "description": "Scheduled date for the tip.",
+          "format": "date-time"
+        },
+        "isEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether the tip is enabled."
+        }
+      },
+      "required": [
+        "id",
+        "tipText",
+        "language",
+        "scheduledDate",
+        "isEnabled"
+      ]
+    },
+    "GovernmentScheme": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "GovernmentScheme",
+      "type": "object",
+      "description": "Represents a government scheme.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the GovernmentScheme entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the government scheme."
+        },
+        "eligibilityInfo": {
+          "type": "string",
+          "description": "Eligibility information for the scheme."
+        },
+        "stateIds": {
+          "type": "array",
+          "description": "References to States. (Relationship: State N:N GovernmentScheme)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isVisible": {
+          "type": "boolean",
+          "description": "Indicates whether the scheme is visible to farmers."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "eligibilityInfo",
+        "stateIds",
+        "isVisible"
+      ]
+    },
+    "OfflineContent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "OfflineContent",
+      "type": "object",
+      "description": "Represents content available offline.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the OfflineContent entity."
+        },
+        "contentType": {
+          "type": "string",
+          "description": "Type of content (e.g., crop data, scheme info)."
+        },
+        "contentData": {
+          "type": "string",
+          "description": "Cached content data (e.g., JSON, serialized data)."
+        },
+        "versionKey": {
+          "type": "string",
+          "description": "Version key for cache updates."
+        },
+        "isCacheRefreshForced": {
+          "type": "boolean",
+          "description": "Flag to force cache refresh."
+        }
+      },
+      "required": [
+        "id",
+        "contentType",
+        "contentData",
+        "versionKey",
+        "isCacheRefreshForced"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/crops/{cropId}",
+        "definition": {
+          "entityName": "Crop",
+          "schema": {
+            "$ref": "#/backend/entities/Crop"
+          },
+          "description": "Stores crop data managed by admins. Includes fields for name, image, supported states, seasons, soil types, and yield information.",
+          "params": [
+            {
+              "name": "cropId",
+              "description": "Unique identifier for the crop."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/states/{stateId}",
+        "definition": {
+          "entityName": "State",
+          "schema": {
+            "$ref": "#/backend/entities/State"
+          },
+          "description": "Stores state information, including name and climate zone.",
+          "params": [
+            {
+              "name": "stateId",
+              "description": "Unique identifier for the state."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/seasons/{seasonId}",
+        "definition": {
+          "entityName": "Season",
+          "schema": {
+            "$ref": "#/backend/entities/Season"
+          },
+          "description": "Stores season information, including name, start date, and end date.",
+          "params": [
+            {
+              "name": "seasonId",
+              "description": "Unique identifier for the season."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/cropLifecycles/{cropLifecycleId}",
+        "definition": {
+          "entityName": "CropLifecycle",
+          "schema": {
+            "$ref": "#/backend/entities/CropLifecycle"
+          },
+          "description": "Stores crop lifecycle details, including sowing, fertilizer, disease, irrigation, and harvesting information.",
+          "params": [
+            {
+              "name": "cropLifecycleId",
+              "description": "Unique identifier for the crop lifecycle."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/weatherAlerts/{weatherAlertId}",
+        "definition": {
+          "entityName": "WeatherAlert",
+          "schema": {
+            "$ref": "#/backend/entities/WeatherAlert"
+          },
+          "description": "Stores weather alert information, including thresholds, messages, and recommended actions.",
+          "params": [
+            {
+              "name": "weatherAlertId",
+              "description": "Unique identifier for the weather alert."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/translations/{translationId}",
+        "definition": {
+          "entityName": "Translation",
+          "schema": {
+            "$ref": "#/backend/entities/Translation"
+          },
+          "description": "Stores translations for different languages.",
+          "params": [
+            {
+              "name": "translationId",
+              "description": "Unique identifier for the translation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/farmingTips/{farmingTipId}",
+        "definition": {
+          "entityName": "FarmingTip",
+          "schema": {
+            "$ref": "#/backend/entities/FarmingTip"
+          },
+          "description": "Stores daily farming tips.",
+          "params": [
+            {
+              "name": "farmingTipId",
+              "description": "Unique identifier for the farming tip."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/governmentSchemes/{governmentSchemeId}",
+        "definition": {
+          "entityName": "GovernmentScheme",
+          "schema": {
+            "$ref": "#/backend/entities/GovernmentScheme"
+          },
+          "description": "Stores government scheme information.",
+          "params": [
+            {
+              "name": "governmentSchemeId",
+              "description": "Unique identifier for the government scheme."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/offlineContent/{offlineContentId}",
+        "definition": {
+          "entityName": "OfflineContent",
+          "schema": {
+            "$ref": "#/backend/entities/OfflineContent"
+          },
+          "description": "Stores offline content data.",
+          "params": [
+            {
+              "name": "offlineContentId",
+              "description": "Unique identifier for the offline content."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore structure is designed for the Smart Crop Advisor Admin Panel, prioritizing Authorization Independence, Clarity, and QAPs. Since authentication is disabled for now, security rules will be permissive during the testing phase but are designed to be easily secured later with minimal changes when authentication is added. The structure leverages structural segregation by separating different data types into distinct collections. Denormalization is applied where necessary to eliminate `get()` calls in security rules when auth is implemented.\n\n**Authorization Independence:** This is achieved by avoiding hierarchical dependencies.  Each top-level collection represents a distinct entity managed by the admin panel. When authentication is implemented, authorization will be based on admin roles (e.g., a collection of admin UIDs) to control access to these collections.\n\n**QAPs (Rules Are Not Filters):** The structure supports secure list operations by segregating data and ensuring that each collection contains documents with uniform security requirements. For example, the `crops` collection stores only crop data managed by admins. There is no need to filter based on user-specific criteria during list operations. When auth is implemented, a simple `allow read: if isAdmin()` rule on each collection will suffice.\n\n**Invariants:** The structure supports invariants such as ownership, timestamps, and denormalized data. While timestamps are not explicitly included in the schema definitions, they can be easily added (e.g., `createdAt`, `updatedAt`) and managed via server timestamps. Denormalization, as described above, maintains data integrity across the board."
+  }
+}
