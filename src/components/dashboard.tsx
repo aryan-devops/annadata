@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, CalendarDays, Edit } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import CropCard from './crop-card';
@@ -401,3 +401,5 @@ export default function Dashboard() {
     </>
   );
 }
+
+    
