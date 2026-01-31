@@ -1,5 +1,15 @@
 
 import { Crop, WeatherAlert, FarmingTip, CropLifecycle, State, Season } from './types';
+import { PlaceHolderImages } from './placeholder-images';
+
+// Create a map for easy lookup from the centralized image file
+const imageMap = new Map(PlaceHolderImages.map(img => [img.id, img.imageUrl]));
+
+// Helper to get image URL from a crop's ID
+const getImageUrl = (cropId: string): string => {
+    return imageMap.get(cropId) || 'https://images.unsplash.com/photo-1570295289045-885a6b13735b?q=80&w=1080'; // Fallback image
+}
+
 
 export const states: State[] = [
   { id: 'haryana', name: 'Haryana', climateZone: 'Subtropical' },
@@ -13,6 +23,11 @@ export const states: State[] = [
   { id: 'gujarat', name: 'Gujarat', climateZone: 'Arid' },
   { id: 'telangana', name: 'Telangana', climateZone: 'Tropical' },
   { id: 'madhya-pradesh', name: 'Madhya Pradesh', climateZone: 'Subtropical'},
+  { id: 'tamil-nadu', name: 'Tamil Nadu', climateZone: 'Tropical' },
+  { id: 'kerala', name: 'Kerala', climateZone: 'Tropical' },
+  { id: 'bihar', name: 'Bihar', climateZone: 'Subtropical' },
+  { id: 'odisha', name: 'Odisha', climateZone: 'Tropical' },
+  { id: 'assam', name: 'Assam', climateZone: 'Tropical' },
 ];
 
 export const seasons: Season[] = [
@@ -42,7 +57,7 @@ export const crops: Crop[] = [
     id: 'wheat-haryana-rabi',
     nameEnglish: 'Wheat',
     nameLocal: 'गेहूं',
-    imageUrl: 'https://images.unsplash.com/photo-1514481043218-e965c5886f06?q=80&w=1080',
+    imageUrl: getImageUrl('wheat'),
     supportedStateIds: ['haryana', 'punjab', 'uttar-pradesh'],
     suitableSeasonIds: ['rabi'],
     soilType: 'Loamy',
@@ -56,8 +71,8 @@ export const crops: Crop[] = [
     id: 'rice-westbengal-kharif',
     nameEnglish: 'Rice',
     nameLocal: 'चावल',
-    imageUrl: 'https://images.unsplash.com/photo-1599328580087-15c9dab481f3?q=80&w=1080',
-    supportedStateIds: ['west-bengal', 'punjab', 'andhra-pradesh'],
+    imageUrl: getImageUrl('rice'),
+    supportedStateIds: ['west-bengal', 'punjab', 'andhra-pradesh', 'bihar', 'odisha'],
     suitableSeasonIds: ['kharif'],
     soilType: 'Clayey Loam',
     idealTemperature: '21-37°C',
@@ -70,9 +85,9 @@ export const crops: Crop[] = [
     id: 'maize-karnataka-kharif',
     nameEnglish: 'Maize (Corn)',
     nameLocal: 'मक्का',
-    imageUrl: 'https://images.unsplash.com/photo-1551810080-3eb3be72d3f4?q=80&w=1080',
-    supportedStateIds: ['karnataka', 'maharashtra', 'rajasthan'],
-    suitableSeasonIds: ['kharif'],
+    imageUrl: getImageUrl('corn'),
+    supportedStateIds: ['karnataka', 'maharashtra', 'rajasthan', 'bihar'],
+    suitableSeasonIds: ['kharif', 'rabi'],
     soilType: 'Red Loam',
     idealTemperature: '21-27°C',
     idealRainfall: '50-100 cm',
@@ -84,8 +99,8 @@ export const crops: Crop[] = [
     id: 'sugarcane-maharashtra-annual',
     nameEnglish: 'Sugarcane',
     nameLocal: 'गन्ना',
-    imageUrl: 'https://images.unsplash.com/photo-1570295289045-885a6b13735b?q=80&w=1080',
-    supportedStateIds: ['maharashtra', 'uttar-pradesh', 'karnataka'],
+    imageUrl: getImageUrl('sugarcane'),
+    supportedStateIds: ['maharashtra', 'uttar-pradesh', 'karnataka', 'tamil-nadu'],
     suitableSeasonIds: ['kharif', 'rabi'], // Annual crop
     soilType: 'Heavy Loam',
     idealTemperature: '20-26°C',
@@ -98,8 +113,8 @@ export const crops: Crop[] = [
     id: 'cotton-gujarat-kharif',
     nameEnglish: 'Cotton',
     nameLocal: 'कपास',
-    imageUrl: 'https://images.unsplash.com/photo-1633527992904-53f86f81a23a?q=80&w=1080',
-    supportedStateIds: ['gujarat', 'maharashtra', 'telangana'],
+    imageUrl: getImageUrl('cotton'),
+    supportedStateIds: ['gujarat', 'maharashtra', 'telangana', 'punjab'],
     suitableSeasonIds: ['kharif'],
     soilType: 'Black Cotton Soil',
     idealTemperature: '21-30°C',
@@ -112,8 +127,8 @@ export const crops: Crop[] = [
     id: 'mustard-rajasthan-rabi',
     nameEnglish: 'Mustard',
     nameLocal: 'सरसों',
-    imageUrl: 'https://images.unsplash.com/photo-1421930866250-aa0594cea05c?q=80&w=1080',
-    supportedStateIds: ['rajasthan', 'haryana', 'uttar-pradesh'],
+    imageUrl: getImageUrl('mustard'),
+    supportedStateIds: ['rajasthan', 'haryana', 'uttar-pradesh', 'madhya-pradesh'],
     suitableSeasonIds: ['rabi'],
     soilType: 'Sandy Loam',
     idealTemperature: '10-25°C',
@@ -126,8 +141,8 @@ export const crops: Crop[] = [
     id: 'potato-uttarpradesh-rabi',
     nameEnglish: 'Potato',
     nameLocal: 'आलू',
-    imageUrl: 'https://images.unsplash.com/photo-1590486803833-1c58779c5683?q=80&w=1080',
-    supportedStateIds: ['uttar-pradesh', 'west-bengal', 'punjab'],
+    imageUrl: getImageUrl('potato'),
+    supportedStateIds: ['uttar-pradesh', 'west-bengal', 'punjab', 'bihar'],
     suitableSeasonIds: ['rabi'],
     soilType: 'Well-drained Sandy Loam',
     idealTemperature: '15-20°C',
@@ -140,8 +155,8 @@ export const crops: Crop[] = [
     id: 'soybean-maharashtra-kharif',
     nameEnglish: 'Soybean',
     nameLocal: 'सोयाबीन',
-    imageUrl: 'https://images.unsplash.com/photo-1553786193-39908a834b69?q=80&w=1080',
-    supportedStateIds: ['maharashtra', 'madhya-pradesh'],
+    imageUrl: getImageUrl('soybean'),
+    supportedStateIds: ['maharashtra', 'madhya-pradesh', 'rajasthan'],
     suitableSeasonIds: ['kharif'],
     soilType: 'Clay Loam',
     idealTemperature: '20-30°C',
@@ -154,8 +169,8 @@ export const crops: Crop[] = [
     id: 'groundnut-gujarat-kharif',
     nameEnglish: 'Groundnut',
     nameLocal: 'मूंगफली',
-    imageUrl: 'https://images.unsplash.com/photo-1594280387556-0026332152bd?q=80&w=1080',
-    supportedStateIds: ['gujarat', 'andhra-pradesh', 'karnataka'],
+    imageUrl: getImageUrl('groundnut'),
+    supportedStateIds: ['gujarat', 'andhra-pradesh', 'karnataka', 'tamil-nadu', 'maharashtra'],
     suitableSeasonIds: ['kharif', 'rabi'],
     soilType: 'Sandy Loam',
     idealTemperature: '25-35°C',
@@ -168,8 +183,8 @@ export const crops: Crop[] = [
     id: 'chickpea-rajasthan-rabi',
     nameEnglish: 'Chickpea (Gram)',
     nameLocal: 'चना',
-    imageUrl: 'https://images.unsplash.com/photo-1625993791283-913a8a364b6a?q=80&w=1080',
-    supportedStateIds: ['rajasthan', 'madhya-pradesh', 'maharashtra'],
+    imageUrl: getImageUrl('chickpea'),
+    supportedStateIds: ['rajasthan', 'madhya-pradesh', 'maharashtra', 'uttar-pradesh'],
     suitableSeasonIds: ['rabi'],
     soilType: 'Light to Heavy Clay',
     idealTemperature: '15-25°C',
