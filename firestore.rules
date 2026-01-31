@@ -1,32 +1,21 @@
 /**
- * This ruleset enforces a strict, role-based security model for the Smart Crop
- * Advisor Admin Panel.
+ * This ruleset is configured for an initial development and testing phase.
  *
  * Core Philosophy:
- * Access is denied by default. All operations, both read and write, are restricted
- * to authenticated users who are designated as administrators. This provides a secure
- * foundation that can be configured once an authentication and admin management
- * system is in place.
+ * Access is currently open to allow for rapid prototyping and UI development of the
+ * Admin Panel without requiring an authentication layer. This is a temporary state.
  *
- * Data Structure:
- * The data is organized into several top-level collections (e.g., /crops, /states,
- * /weatherAlerts), each representing a core data entity managed by the admin panel.
- * There is no user-specific data or hierarchical nesting, which simplifies the
- * security model to a global admin check.
+ * <strong>WARNING:</strong> These rules are insecure and MUST NOT be used in a production
+ * environment. Before deploying, you must implement a proper authentication
+ * and authorization model (e.g., role-based access control).
  *
  * Key Security Decisions:
- * - Admin-Only Access: All collections are considered internal and are only
- *   accessible by administrators. There is no public or user-specific data access.
- * - Centralized Admin Logic: A single `isAdmin()` function is used across all
- *   rules to ensure consistent and easily maintainable security logic.
- * - Secure by Default: The `isAdmin()` function is a placeholder that returns `false`.
- *   This ensures the database is completely locked down until the developer
- *   explicitly implements the admin-checking logic (e.g., by checking an 'admins'
- *   collection).
- * - No Schema Validation: In line with the prototyping philosophy, these rules do
- *   not enforce the shape or type of data being written. The focus is strictly on
- *   "who" can access the data, not "what" the data looks like. This allows for
-_  *   rapid iteration on the data model without needing to update security rules.
+ * - Open Access for Prototyping: The `isAdmin()` function is temporarily set to
+ *   `return true;`, which grants open read/write access to all collections.
+ *   This is to facilitate development as requested.
+ * - Future-Ready Structure: The rules are structured per-collection, making it easy
+ *   to apply granular security by switching `isAdmin()` back to its secure
+ *   implementation once the authentication feature is implemented.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -45,16 +34,16 @@ service cloud.firestore {
 
     /**
      * Checks if the authenticated user has admin privileges.
-     * This is a placeholder and MUST be implemented for the rules to work.
-     * By default, it returns false, locking down the database.
+     * WARNING: This is temporarily set to `true` for the testing phase.
+     * This makes your database publicly readable and writable.
      *
-     * Example Implementation:
+     * Secure Implementation Example:
      *   return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
      */
     function isAdmin() {
-      // TODO: Implement your admin verification logic here.
-      // The line below is a secure placeholder. Replace it with your actual check.
-      return false;
+      // Temporarily open for development.
+      // TODO: Re-secure this before production.
+      return true;
     }
 
     /**
