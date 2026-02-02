@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
-import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, CalendarDays, Edit, AlertTriangle } from 'lucide-react';
+import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, CalendarDays, Edit, AlertTriangle, CloudRain, Sun, Snowflake, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -21,22 +21,34 @@ import { locationData, statesList } from '@/lib/location-data';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const translations = {
-  location: { en: 'Your Location', hi: 'आपका स्थान', mr: 'तुमचे स्थान', ta: 'உங்கள் இடம்', te: 'మీ స్థానం', bn: 'আপনার অবস্থান' },
-  detecting: { en: 'Detecting location...', hi: 'स्थान का पता लगाया जा रहा है...', mr: 'स्थान शोधत आहे...', ta: 'இருப்பிடம் கண்டறியப்படுகிறது...', te: 'స్థానాన్ని గుర్తిస్తోంది...', bn: 'অবস্থান সনাক্ত করা হচ্ছে...' },
-  manualLocation: { en: 'Set Location Manually', hi: 'मैन्युअल रूप से स्थान सेट करें', mr: 'व्यक्तिचलितपणे स्थान सेट करा', ta: 'இருப்பிடத்தை கைமுறையாக அமைக்கவும்', te: 'మానవీయంగా స్థానాన్ని సెట్ చేయండి', bn: 'ম্যানুয়ালি অবস্থান সেট করুন' },
-  changeLocation: { en: 'Change Location', hi: 'स्थान बदलें', mr: 'स्थान बदला', ta: 'இருப்பிடத்தை மாற்றவும்', te: 'స్థానాన్ని మార్చండి', bn: 'অবস্থান পরিবর্তন করুন' },
-  setLocation: { en: 'Set Location', hi: 'स्थान सेट करें', mr: 'स्थान सेट करा', ta: 'இடத்தை அமை', te: 'స్థానాన్ని సెట్ చేయి', bn: 'অবস্থান সেট করুন' },
-  dailyTip: { en: "Today's Tip", hi: 'आज का सुझाव', mr: 'आजची टीप', ta: 'இன்றைய குறிப்பு', te: 'ఈ రోజు చిట్కా', bn: 'আজকের টিপ' },
-  cropRecommendations: { en: 'Crop Recommendations', hi: 'फसल सुझाव', mr: 'पीक शिफारसी', ta: 'பயிர் பரிந்துரைகள்', te: 'పంట సిఫార్సులు', bn: 'ফসলের সুপারিশ' },
-  currentWeather: { en: 'Current Weather', hi: 'वर्तमान मौसम', mr: 'सध्याचे हवामान', ta: 'தற்போதைய வானிலை', te: 'ప్రస్తుత వాతావరణం', bn: 'বর্তমান আবহাওয়া' },
-  feelsLike: { en: 'Feels like', hi: 'जैसा लगता है', mr: 'असे वाटते', ta: 'உணர்வது போல்', te: 'అనిపిస్తుంది', bn: 'অনুভব হচ্ছে' },
-  wind: { en: 'Wind', hi: 'हवा', mr: 'वारा', ta: 'காற்று', te: 'గాలి', bn: 'বায়ু' },
-  humidity: { en: 'Humidity', hi: 'नमी', mr: 'आर्द्रता', ta: 'ஈரப்பதம்', te: 'తేమ', bn: 'আর্দ্রতা' },
-  enterLocationPrompt: { en: 'Enter a location to see the weather.', hi: 'मौसम देखने के लिए एक स्थान दर्ज करें।', mr: 'हवामान पाहण्यासाठी स्थान प्रविष्ट करा.', ta: 'வானிலையைப் பார்க்க ஒரு இடத்தைப் உள்ளிடவும்.', te: 'వాతావరణం చూడటానికి ఒక స్థానాన్ని నమోదు చేయండి.', bn: 'আবহাওয়া দেখতে একটি অবস্থান লিখুন।' },
-  couldNotDetectLocation: { en: 'Your location could not be automatically detected. Please enter it manually.', hi: 'आपके स्थान का स्वचालित रूप से पता नहीं लगाया जा सका। कृपया इसे मैन्युअल रूप से दर्ज करें।', mr: 'तुमचे स्थान आपोआप शोधले जाऊ शकले नाही. कृपया ते व्यक्तिचलितपणे प्रविष्ट करा.', ta: 'உங்கள் இருப்பிடத்தை தானாக கண்டறிய முடியவில்லை. தயவுசெய்து அதை கைமுறையாக உள்ளிடவும்.', te: 'మీ స్థానం స్వయంచాలకంగా గుర్తించబడలేదు. దయచేసి దాన్ని మాన్యువల్‌గా నమోదు చేయండి.', bn: 'আপনার অবস্থান স্বয়ংক্রিয়ভাবে সনাক্ত করা যায়নি। অনুগ্রহ করে এটি ম্যানুয়ালি প্রবেশ করান।' },
-  basedOnSeason: { en: 'Based on the current season', hi: 'वर्तमान मौसम के आधार पर', mr: 'सध्याच्या हंगामावर आधारित', ta: 'தற்போதைய பருவத்தின் அடிப்படையில்', te: 'ప్రస్తుత సీజన్ ఆధారంగా', bn: 'বর্তমান মৌসুমের উপর ভিত্তি করে' },
-  filterBySoil: { en: 'Filter by soil type...', hi: 'मिट्टी के प्रकार से फ़िल्टर करें...', mr: 'मातीच्या प्रकारानुसार फिल्टर करा...', ta: 'மண் வகையின்படி வடிகட்டவும்...', te: 'నేల రకం ద్వారా ఫిల్టర్ చేయండి...', bn: 'মাটির ধরন অনুসারে ফিল্টার করুন...' },
-  allSoils: { en: 'All Soil Types', hi: 'सभी मिट्टी के प्रकार', mr: 'सर्व मातीचे प्रकार', ta: 'அனைத்து மண் வகைகள்', te: 'అన్ని నేల రకాలు', bn: 'সমস্ত মাটির প্রকার' },
+  location: { en: 'Your Location', hi: 'आपका स्थान' },
+  detecting: { en: 'Detecting location...', hi: 'स्थान का पता लगाया जा रहा है...' },
+  manualLocation: { en: 'Set Location Manually', hi: 'मैन्युअल रूप से स्थान सेट करें' },
+  changeLocation: { en: 'Change Location', hi: 'स्थान बदलें' },
+  setLocation: { en: 'Set Location', hi: 'स्थान सेट करें' },
+  dailyTip: { en: "Today's Tip", hi: 'आज का सुझाव' },
+  cropRecommendations: { en: 'Crop Recommendations', hi: 'फसल सुझाव' },
+  currentWeather: { en: 'Current Weather', hi: 'वर्तमान मौसम' },
+  feelsLike: { en: 'Feels like', hi: 'जैसा लगता है' },
+  wind: { en: 'Wind', hi: 'हवा' },
+  humidity: { en: 'Humidity', hi: 'नमी' },
+  enterLocationPrompt: { en: 'Enter a location to see the weather.', hi: 'मौसम देखने के लिए एक स्थान दर्ज करें।' },
+  couldNotDetectLocation: { en: 'Your location could not be automatically detected. Please enter it manually.', hi: 'आपके स्थान का स्वचालित रूप से पता नहीं लगाया जा सका। कृपया इसे मैन्युअल रूप से दर्ज करें।' },
+  basedOnSeason: { en: 'Based on the current season', hi: 'वर्तमान मौसम के आधार पर' },
+  filterBySoil: { en: 'Filter by soil type...', hi: 'मिट्टी के प्रकार से फ़िल्टर करें...' },
+  allSoils: { en: 'All Soil Types', hi: 'सभी मिट्टी के प्रकार' },
+
+  // Alert and Season translations
+  normalWeatherTitle: { en: 'Weather is Normal', hi: 'मौसम सामान्य है' },
+  normalWeatherMessage: { en: 'Current and forecast conditions are suitable for normal farming activities.', hi: 'वर्तमान और पूर्वानुमान की स्थितियाँ सामान्य खेती की गतिविधियों के लिए उपयुक्त हैं।' },
+  normalWeatherAdvice: { en: 'You may continue with sowing, irrigation, and routine field work.', hi: 'आप बुवाई, सिंचाई और नियमित खेत के काम के साथ जारी रख सकते हैं।' },
+  
+  drySpellTitle: { en: 'Dry Spell Alert', hi: 'सूखे का अलर्ट' },
+  drySpellAdvice: { en: 'Plan for irrigation and delay fertilizer application as no rain is forecast for the next 7 days.', hi: 'सिंचाई की योजना बनाएं और उर्वरक डालने में देरी करें क्योंकि अगले 7 दिनों तक बारिश का कोई पूर्वानुमान नहीं है।' },
+
+  seasonalOutlook: { en: 'Seasonal Outlook', hi: 'मौसमी दृष्टिकोण' },
+  seasonSuitability: { en: 'This weather is suitable for {season} crops like {crops}.', hi: 'यह मौसम {crops} जैसी {season} फसलों के लिए उपयुक्त है।' },
+  seasonInfo: { en: 'Currently in the {season} season in {state}.', hi: 'वर्तमान में {state} में {season} का मौसम है।'},
 };
 
 const seasonDefinitions = [
@@ -45,7 +57,7 @@ const seasonDefinitions = [
     { id: 'zaid', name: 'Zaid', startMonth: 3, endMonth: 4 }, // Apr to May
 ];
 
-const soilTypes = [ 'All', 'Loamy', 'Clayey Loam', 'Red Loam', 'Heavy Loam', 'Black Cotton Soil', 'Sandy Loam', 'Light to Heavy Clay' ];
+const soilTypes = [ 'All', 'Loamy', 'Clayey Loam', 'Red Loam', 'Heavy Loam', 'Black Cotton Soil', 'Sandy Loam', 'Light to Heavy Clay', 'Well-drained Sandy Loam', 'Clay Loam' ];
 
 function getCurrentSeason() {
     const currentMonth = new Date().getMonth();
@@ -85,7 +97,7 @@ const WeatherSkeleton = () => (
 const CropCardSkeleton = () => (
   <Card className="flex flex-col overflow-hidden">
     <CardHeader className="p-0">
-      <Skeleton className="h-48 w-full" />
+      <Skeleton className="relative h-48 w-full" />
     </CardHeader>
     <CardContent className="flex-grow p-4">
       <Skeleton className="h-6 w-3/4 mb-2" />
@@ -122,6 +134,86 @@ export default function Dashboard() {
   const { data: farmingTips, isLoading: isLoadingTips } = useCollection<FarmingTip>(farmingTipsCollectionRef);
   const { data: weatherAlerts } = useCollection<WeatherAlertType>(weatherAlertsCollectionRef);
 
+  const activeAlert = useMemo(() => {
+    if (!weather?.forecast || !weatherAlerts) return null;
+
+    const triggered = [];
+    const forecast = weather.forecast.forecastday;
+
+    // Evaluate configurable alerts from Firestore against the forecast
+    for (const rule of weatherAlerts) {
+        if (!rule.isEnabled) continue;
+        
+        let isTriggeredThisRule = false;
+        for (const day of forecast) {
+            const evaluations = [
+                (rule.frostRisk === true) ? (day.day.mintemp_c <= 4) : null,
+                (rule.thresholdTemperatureMax != null) ? (day.day.maxtemp_c > rule.thresholdTemperatureMax) : null,
+                (rule.thresholdTemperatureMin != null) ? (day.day.mintemp_c < rule.thresholdTemperatureMin) : null,
+                (rule.thresholdRain != null) ? (day.day.totalprecip_mm > rule.thresholdRain) : null,
+                (rule.thresholdWind != null) ? (day.day.maxwind_kph > rule.thresholdWind) : null,
+                (rule.thresholdHumidity != null) ? (day.day.avghumidity > rule.thresholdHumidity) : null,
+            ];
+            
+            const definedConditions = evaluations.filter(result => result !== null);
+
+            if (definedConditions.length > 0 && definedConditions.every(result => result === true)) {
+                isTriggeredThisRule = true;
+                break; 
+            }
+        }
+
+        if (isTriggeredThisRule) {
+            let priority = 4; // default low
+            let variant: 'destructive' | 'warning' | 'default' = 'default';
+            let icon: React.ElementType = AlertTriangle;
+
+            if (rule.frostRisk || (rule.thresholdTemperatureMax && rule.thresholdTemperatureMax >= 40) || rule.thresholdTemperatureMin) {
+                priority = 1; // Critical
+                variant = 'destructive';
+                icon = (rule.frostRisk || rule.thresholdTemperatureMin) ? Snowflake : Sun;
+            } else if (rule.thresholdWind) {
+                priority = 2; // High
+                variant = 'warning';
+            } else if (rule.thresholdRain) {
+                priority = 3; // Medium
+                icon = CloudRain;
+            }
+            
+            triggered.push({ ...rule, priority, variant, icon });
+        }
+    }
+
+    // Evaluate hardcoded Dry Spell alert
+    const isDrySpell = forecast.length >= 7 && forecast.every((day:any) => day.day.totalprecip_mm === 0);
+    if (isDrySpell) {
+        triggered.push({
+            id: 'dry-spell',
+            priority: 2,
+            alertMessage: t(translations.drySpellTitle),
+            recommendedActions: t(translations.drySpellAdvice),
+            variant: 'warning',
+            icon: Sun
+        });
+    }
+
+    if (triggered.length === 0) {
+        return {
+            id: 'normal',
+            type: 'Normal',
+            title: t(translations.normalWeatherTitle),
+            message: t(translations.normalWeatherMessage),
+            advice: t(translations.normalWeatherAdvice),
+            variant: 'success',
+            icon: CheckCircle2,
+        };
+    }
+
+    triggered.sort((a, b) => a.priority - b.priority);
+    return triggered[0];
+
+  }, [weather, weatherAlerts, t]);
+
   const dynamicTip = useMemo(() => {
     if (!farmingTips || farmingTips.length === 0) return null;
 
@@ -141,52 +233,37 @@ export default function Dashboard() {
         possibleTips = farmingTips.filter(t => t.category === 'general' && t.isEnabled);
     }
     
-    if (possibleTips.length === 0) return null;
+    if (possibleTips.length === 0) return farmingTips[0] || null;
     
     const randomIndex = Math.floor(Math.random() * possibleTips.length);
     return possibleTips[randomIndex];
 
   }, [farmingTips, weather]);
 
-  const triggeredAlerts = useMemo(() => {
-    if (!weather || !weatherAlerts) return [];
-    const { temp_c, precip_mm, wind_kph, humidity } = weather.current;
+  const seasonMessage = useMemo(() => {
+    if (!currentSeasonInfo || !weather?.location?.region || !crops || !states) return '';
+    const seasonName = currentSeasonInfo.name;
+    const stateName = weather.location.region;
     
-    return weatherAlerts.filter(alert => {
-        if (!alert.isEnabled) {
-            return false;
-        }
+    const currentState = states.find(s => s.name === stateName);
+    if (!currentState) return t(translations.seasonInfo).replace('{season}', seasonName).replace('{state}', stateName);
 
-        // An array to hold the evaluation of each condition defined on the alert.
-        const evaluations: (boolean | null)[] = [
-            (alert.frostRisk === true) ? (temp_c <= 4) : null,
-            (alert.thresholdTemperatureMax != null) ? (temp_c > alert.thresholdTemperatureMax) : null,
-            (alert.thresholdTemperatureMin != null) ? (temp_c < alert.thresholdTemperatureMin) : null,
-            (alert.thresholdRain != null) ? (precip_mm > alert.thresholdRain) : null,
-            (alert.thresholdWind != null) ? (wind_kph > alert.thresholdWind) : null,
-            (alert.thresholdHumidity != null) ? (humidity > alert.thresholdHumidity) : null,
-        ];
-        
-        // Filter out the nulls to get only the conditions that are actually defined for this alert.
-        const definedConditions = evaluations.filter(result => result !== null);
+    const suitableCrops = crops
+        .filter(c => c.suitableSeasonIds.includes(currentSeasonInfo.id) && c.supportedStateIds.includes(currentState.id))
+        .map(c => c.nameEnglish)
+        .slice(0, 2)
+        .join(' and ');
 
-        // If no conditions are defined on this alert, it should not trigger.
-        if (definedConditions.length === 0) {
-            return false;
-        }
-        
-        // For the alert to trigger, ALL of its defined conditions must be true.
-        return definedConditions.every(result => result === true);
-    });
-  }, [weather, weatherAlerts]);
+    if (suitableCrops) {
+        return t(translations.seasonSuitability).replace('{season}', seasonName).replace('{crops}', suitableCrops);
+    }
+    
+    return t(translations.seasonInfo).replace('{season}', seasonName).replace('{state}', stateName);
+  }, [currentSeasonInfo, weather, crops, states, t]);
 
   const dailyTipText = dynamicTip?.tipText || t({
       en: "Check soil moisture before irrigating your crops to avoid overwatering.",
       hi: "पानी की अधिकता से बचने के लिए अपनी फसलों की सिंचाई करने से पहले मिट्टी की नमी की जाँच करें।",
-      mr: "जास्त पाणी देणे टाळण्यासाठी आपल्या पिकांना पाणी देण्यापूर्वी जमिनीतील ओलावा तपासा.",
-      ta: "அதிக நீர் பாய்ச்சுவதைத் தவிர்க்க, உங்கள் பயிர்களுக்கு நீர்ப்பாசனம் செய்வதற்கு முன் மண்ணின் ஈரப்பதத்தைச் சரிபார்க்கவும்.",
-      te: "అధిక నీటిపారుదలని నివారించడానికి మీ పంటలకు నీటిపారుదల చేసే ముందు నేల తేమను తనిఖీ చేయండి.",
-      bn: "অতিরিক্ত জল দেওয়া এড়াতে আপনার ফসলে জল দেওয়ার আগে মাটির আর্দ্রতা পরীক্ষা করুন।",
   });
 
   const recommendedCrops = useMemo(() => {
@@ -205,7 +282,8 @@ export default function Dashboard() {
     }
 
     if (selectedSoilType && selectedSoilType !== 'All') {
-        filteredCrops = filteredCrops.filter(crop => crop.soilType === selectedSoilType);
+        const soilRegex = new RegExp(selectedSoilType, 'i');
+        filteredCrops = filteredCrops.filter(crop => soilRegex.test(crop.soilType));
     }
     
     return filteredCrops;
@@ -246,7 +324,7 @@ export default function Dashboard() {
             setWeatherError("Weather API key is not configured.");
             return;
           }
-          const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location}`);
+          const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${location}&days=7&aqi=no&alerts=no`);
           if (!res.ok) {
             const errorData = await res.json();
             throw new Error(errorData?.error?.message || 'Failed to fetch weather data.');
@@ -278,19 +356,39 @@ export default function Dashboard() {
   return (
     <>
     <div className="space-y-8">
-       {/* Weather Alerts Section */}
-      {triggeredAlerts.length > 0 && (
-          <div className='space-y-2'>
-              {triggeredAlerts.map(alert => (
-                  <Alert key={alert.id} variant="destructive">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertTitle>Weather Alert: {alert.alertMessage}</AlertTitle>
-                      <AlertDescription>
-                          Recommended Action: {alert.recommendedActions}
-                      </AlertDescription>
-                  </Alert>
-              ))}
-          </div>
+       {/* Smart Weather Alert Section */}
+      {activeAlert ? (
+          activeAlert.id === 'normal' ? (
+            <Alert variant="success">
+              <activeAlert.icon className="h-4 w-4" />
+              <AlertTitle>{activeAlert.title}</AlertTitle>
+              <AlertDescription>
+                {activeAlert.message} {activeAlert.advice}
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <Alert variant={activeAlert.variant}>
+              <activeAlert.icon className="h-4 w-4" />
+              <AlertTitle>{activeAlert.alertMessage}</AlertTitle>
+              <AlertDescription>
+                {activeAlert.recommendedActions}
+              </AlertDescription>
+            </Alert>
+          )
+      ) : (
+        <Skeleton className="h-20 w-full" />
+      )}
+
+      {/* Seasonal Outlook Card */}
+      {seasonMessage && (
+        <Card>
+            <CardHeader>
+                <CardTitle>{t(translations.seasonalOutlook)}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p>{seasonMessage}</p>
+            </CardContent>
+        </Card>
       )}
 
       {/* Location Section */}
