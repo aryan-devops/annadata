@@ -2,17 +2,24 @@
 'use client';
     
 import Link from 'next/link';
-import { Sprout, Shield } from 'lucide-react';
+import { Sprout, Shield, LogOut } from 'lucide-react';
 import { LanguageSwitcher } from './language-switcher';
 import { Button } from './ui/button';
 import { usePathname } from 'next/navigation';
+import { useUser, useAuth } from '@/firebase';
 
 export function Header() {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith('/admin');
+  const { user } = useUser();
+  const auth = useAuth();
+  
+  const handleLogout = () => {
+      auth.signOut();
+  };
 
   if (isAdminRoute) {
-    return null; // Header is not shown on admin routes
+    return null; // Header is not shown on admin routes, they have their own sidebar/header
   }
 
   return (
@@ -28,12 +35,19 @@ export function Header() {
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
           <LanguageSwitcher />
-          <Button asChild variant="ghost" size="icon">
-            <Link href="/admin/dashboard">
-              <Shield className="h-[1.2rem] w-[1.2rem]" />
-              <span className="sr-only">Admin Panel</span>
-            </Link>
-          </Button>
+          {user ? (
+            <Button onClick={handleLogout} variant="ghost" size="icon" title="Logout">
+                <LogOut className="h-[1.2rem] w-[1.2rem]" />
+                <span className="sr-only">Logout</span>
+            </Button>
+          ) : (
+            <Button asChild variant="ghost" size="icon" title="Admin Panel">
+              <Link href="/admin">
+                <Shield className="h-[1.2rem] w-[1.2rem]" />
+                <span className="sr-only">Admin Panel</span>
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>

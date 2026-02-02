@@ -1,63 +1,65 @@
-/**
- * This ruleset is configured for an initial development and testing phase.
- *
- * Core Philosophy:
- * Access is currently open to allow for rapid prototyping and UI development of the
- * Admin Panel without requiring an authentication layer. This is a temporary state.
- *
- * <strong>WARNING:</strong> These rules are insecure and MUST NOT be used in a production
- * environment. Before deploying, you must implement a proper authentication
- * and authorization model (e.g., role-based access control).
- *
- * Key Security Decisions:
- * - Open Access for Prototyping: The rules are temporarily set to `allow read, write: if true;`
- *   which grants open read/write access to all collections.
- *   This is to facilitate development as requested.
- * - Future-Ready Structure: The rules are structured per-collection, making it easy
- *   to apply granular security later.
- */
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Helper function to check for authenticated users
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Default deny all reads and writes to force explicit rules
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
     // -------------------------------------------------------------------------
-    // Collection Rules - OPEN FOR DEVELOPMENT
+    // PUBLIC-READ, ADMIN-WRITE COLLECTIONS
     // -------------------------------------------------------------------------
 
     match /crops/{cropId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
 
     match /states/{stateId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
 
     match /seasons/{seasonId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
 
     match /cropLifecycles/{cropLifecycleId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
 
     match /weatherAlerts/{weatherAlertId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
 
     match /translations/{translationId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
 
     match /farmingTips/{farmingTipId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
 
     match /governmentSchemes/{governmentSchemeId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
 
     match /offlineContent/{offlineContentId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
   }
 }

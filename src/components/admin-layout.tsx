@@ -1,11 +1,14 @@
 
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { usePathname, redirect } from 'next/navigation';
+import { useUser, useAuth } from '@/firebase';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarContent, SidebarHeader, SidebarInset, SidebarFooter, SidebarSeparator } from '@/components/ui/sidebar';
-import { Sprout, Home, Tractor, Droplets, Wheat, BookOpen } from 'lucide-react';
+import { Sprout, Home, Tractor, Droplets, Wheat, BookOpen, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { Header } from './header';
+import Preloader from './preloader';
 
 const adminNavItems = [
     { href: '/admin/dashboard', icon: <Tractor />, label: 'Dashboard' },
@@ -17,6 +20,14 @@ const adminNavItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isAdminRoute = pathname.startsWith('/admin');
+    const { user, isUserLoading } = useUser();
+    const auth = useAuth();
+
+    useEffect(() => {
+        if (!isUserLoading && !user && isAdminRoute) {
+            redirect('/login');
+        }
+    }, [user, isUserLoading, isAdminRoute]);
 
     if (!isAdminRoute) {
         return (
@@ -26,7 +37,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
         )
     }
+    
+    // From here, we are on an admin route.
+    
+    if (isUserLoading || !user) {
+        // Show preloader while checking auth or if user is null (before redirect kicks in)
+        return <Preloader />;
+    }
 
+    const handleLogout = () => {
+        auth.signOut();
+    };
+    
     return (
         <SidebarProvider>
             <Sidebar>
@@ -60,6 +82,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                     <span>Back to App</span>
                                 </SidebarMenuButton>
                             </Link>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton onClick={handleLogout}>
+                                <LogOut />
+                                <span>Logout</span>
+                            </SidebarMenuButton>
                         </SidebarMenuItem>
                     </SidebarMenu>
                 </SidebarFooter>
