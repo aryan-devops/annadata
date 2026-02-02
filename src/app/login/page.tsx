@@ -33,7 +33,7 @@ export default function LoginPage() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: 'aryan.devops',
+      username: '',
       password: '',
     },
   });
@@ -62,27 +62,30 @@ export default function LoginPage() {
     const emailForFirebase = 'aryan.devops@annadata.ai'; // Use a valid email format for Firebase
 
     try {
+      // First, try to sign in
       await signInWithEmailAndPassword(auth, emailForFirebase, values.password);
       toast({ title: 'Login Successful', description: 'Redirecting to dashboard...' });
       router.push('/admin/dashboard');
     } catch (error: any) {
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+        // If the user does not exist, create the account (one-time setup)
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
             try {
                 await createUserWithEmailAndPassword(auth, emailForFirebase, values.password);
-                toast({ title: 'Admin Account Created', description: 'Logging you in...' });
-                router.push('/admin/dashboard');
+                toast({ title: 'Admin Account Created', description: 'This is a one-time setup. Logging you in...' });
+                // The onAuthStateChanged listener in the provider will handle the redirect
             } catch (createError: any) {
                  toast({
                     variant: 'destructive',
-                    title: 'Setup Failed',
-                    description: createError.message || 'Could not create admin account.',
+                    title: 'Admin Setup Failed',
+                    description: createError.message || 'Could not create the admin account.',
                 });
             }
         } else {
+             // Handle other errors like wrong password
              toast({
                 variant: 'destructive',
                 title: 'Login Failed',
-                description: error.message || 'An unknown error occurred.',
+                description: 'Incorrect password or another error occurred.',
             });
         }
     } finally {

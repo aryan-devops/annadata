@@ -55,7 +55,3 @@ To get a local copy up and running, follow these simple steps.
     ```
 
 Open [http://localhost:9002](http://localhost:9002) with your browser to see the result.
-
-### Seeding the Database
-
-To populate the Firestore database with initial sample data (crops, seasons, etc.), navigate to the Admin Dashboard in the app and click the **"Seed Database"** button.

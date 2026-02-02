@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
-import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, CalendarDays, Edit } from 'lucide-react';
+import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, CalendarDays, Edit, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -13,7 +13,7 @@ import { useLanguage } from '@/context/language-context';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { collection } from 'firebase/firestore';
 import { useCollection } from '@/firebase/firestore/use-collection';
-import type { Crop, State } from '@/lib/types';
+import type { Crop, State, FarmingTip, WeatherAlert as WeatherAlertType } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -113,9 +113,42 @@ export default function Dashboard() {
 
   const firestore = useFirestore();
   const cropsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'crops'): null, [firestore]);
-  const { data: crops, isLoading: isLoadingCrops, error: cropsError } = useCollection<Crop>(cropsCollectionRef);
   const statesCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'states') : null, [firestore]);
+  const farmingTipsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'farmingTips') : null, [firestore]);
+  const weatherAlertsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'weatherAlerts') : null, [firestore]);
+
+  const { data: crops, isLoading: isLoadingCrops, error: cropsError } = useCollection<Crop>(cropsCollectionRef);
   const { data: states } = useCollection<State>(statesCollectionRef);
+  const { data: farmingTips, isLoading: isLoadingTips } = useCollection<FarmingTip>(farmingTipsCollectionRef);
+  const { data: weatherAlerts, isLoading: isLoadingAlerts } = useCollection<WeatherAlertType>(weatherAlertsCollectionRef);
+
+  const dailyTip = useMemo(() => {
+    if (!farmingTips) return null;
+    const today = new Date().toDateString();
+    return farmingTips.find(tip => tip.isEnabled && new Date(tip.scheduledDate).toDateString() === today);
+  }, [farmingTips]);
+
+  const triggeredAlerts = useMemo(() => {
+    if (!weather || !weatherAlerts) return [];
+    const { temp_c, precip_mm } = weather.current;
+    
+    return weatherAlerts.filter(alert => {
+      if (!alert.isEnabled) return false;
+      if (alert.frostRisk && temp_c <= 4) return true;
+      if (temp_c < alert.thresholdTemperatureMin || temp_c > alert.thresholdTemperatureMax) return true;
+      if (precip_mm > alert.thresholdRain && alert.thresholdRain > 0) return true;
+      return false;
+    });
+  }, [weather, weatherAlerts]);
+
+  const dailyTipText = dailyTip?.tipText || t({
+      en: "Check soil moisture before irrigating your crops to avoid overwatering.",
+      hi: "पानी की अधिकता से बचने के लिए अपनी फसलों की सिंचाई करने से पहले मिट्टी की नमी की जाँच करें।",
+      mr: "जास्त पाणी देणे टाळण्यासाठी आपल्या पिकांना पाणी देण्यापूर्वी जमिनीतील ओलावा तपासा.",
+      ta: "அதிக நீர் பாய்ச்சுவதைத் தவிர்க்க, உங்கள் பயிர்களுக்கு நீர்ப்பாசனம் செய்வதற்கு முன் மண்ணின் ஈரப்பதத்தைச் சரிபார்க்கவும்.",
+      te: "అధిక నీటిపారుదలని నివారించడానికి మీ పంటలకు నీటిపారుదల చేసే ముందు నేల తేమను తనిఖీ చేయండి.",
+      bn: "অতিরিক্ত জল দেওয়া এড়াতে আপনার ফসলে জল দেওয়ার আগে মাটির আর্দ্রতা পরীক্ষা করুন।",
+  });
 
   const recommendedCrops = useMemo(() => {
     if (!crops || !currentSeasonInfo || !states) return [];
@@ -157,8 +190,6 @@ export default function Dashboard() {
       },
       () => {
         setIsLoadingLocation(false);
-        // Don't open dialog automatically, let user click button
-        // setIsLocationDialogOpen(true);
       },
       { timeout: 10000 }
     );
@@ -204,19 +235,25 @@ export default function Dashboard() {
       setIsLocationDialogOpen(false);
     }
   };
-  
-  const dailyTipText = t({
-      en: "Check soil moisture before irrigating your crops to avoid overwatering.",
-      hi: "पानी की अधिकता से बचने के लिए अपनी फसलों की सिंचाई करने से पहले मिट्टी की नमी की जाँच करें।",
-      mr: "जास्त पाणी देणे टाळण्यासाठी आपल्या पिकांना पाणी देण्यापूर्वी जमिनीतील ओलावा तपासा.",
-      ta: "அதிக நீர் பாய்ச்சுவதைத் தவிர்க்க, உங்கள் பயிர்களுக்கு நீர்ப்பாசனம் செய்வதற்கு முன் மண்ணின் ஈரப்பதத்தைச் சரிபார்க்கவும்.",
-      te: "అధిక నీటిపారుదలని నివారించడానికి మీ పంటలకు నీటిపారుదల చేసే ముందు నేల తేమను తనిఖీ చేయండి.",
-      bn: "অতিরিক্ত জল দেওয়া এড়াতে আপনার ফসলে জল দেওয়ার আগে মাটির আর্দ্রতা পরীক্ষা করুন।",
-  });
 
   return (
     <>
     <div className="space-y-8">
+       {/* Weather Alerts Section */}
+      {triggeredAlerts.length > 0 && (
+          <div className='space-y-2'>
+              {triggeredAlerts.map(alert => (
+                  <Alert key={alert.id} variant="destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTitle>Weather Alert: {alert.alertMessage}</AlertTitle>
+                      <AlertDescription>
+                          Recommended Action: {alert.recommendedActions}
+                      </AlertDescription>
+                  </Alert>
+              ))}
+          </div>
+      )}
+
       {/* Location Section */}
       <Card>
         <CardHeader>
@@ -256,7 +293,14 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">{dailyTipText}</p>
+              {isLoadingTips ? (
+                  <div className='space-y-2'>
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                  </div>
+              ) : (
+                <p className="mb-4">{dailyTipText}</p>
+              )}
               <VoiceReadoutButton textToRead={dailyTipText} />
             </CardContent>
           </Card>
@@ -401,5 +445,3 @@ export default function Dashboard() {
     </>
   );
 }
-
-    
