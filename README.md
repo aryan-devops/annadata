@@ -53,7 +53,7 @@ To get a local copy up and running, follow these simple steps.
     - Create a file named `.env.local` in the root of your project.
     - Add your WeatherAPI.com key to this file to enable the weather features:
       ```
-      WEATHER_API_KEY=your_weather_api_key_here
+      NEXT_PUBLIC_WEATHER_API_KEY=your_weather_api_key_here
       ```
 
 4.  **Set up Firebase:**

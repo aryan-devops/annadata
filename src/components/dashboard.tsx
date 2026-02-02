@@ -19,7 +19,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { locationData, statesList } from '@/lib/location-data';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getWeatherData } from '@/app/actions';
 
 const translations = {
   location: { en: 'Your Location', hi: 'आपका स्थान' },
@@ -298,13 +297,23 @@ export default function Dashboard() {
         setIsFetchingWeather(true);
         setWeatherError(null);
         setWeather(null);
-        const result = await getWeatherData(location);
-        if (result.success) {
-          setWeather(result.data);
-        } else {
-          setWeatherError(result.error);
+        try {
+            const apiKey = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
+            if (!apiKey) {
+              throw new Error("Weather API key is not configured. Please set NEXT_PUBLIC_WEATHER_API_KEY in your .env.local file or server environment.");
+            }
+            const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${location}&days=7&aqi=no&alerts=no`);
+            if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(errorData?.error?.message || 'Failed to fetch weather data.');
+            }
+            const data = await res.json();
+            setWeather(data);
+        } catch (error: any) {
+            setWeatherError(error.message);
+        } finally {
+            setIsFetchingWeather(false);
         }
-        setIsFetchingWeather(false);
       };
       fetchWeather();
     }
@@ -397,7 +406,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle>{t(translations.currentWeather)}</CardTitle>
-              {weather && <CardDescription>{weather.location.name}, {weather.location.country}</CardDescription>}
+              {weather && <CardDescription>{`${weather.location.name}, ${weather.location.country}`}</CardDescription>}
             </CardHeader>
             <CardContent>
               {isFetchingWeather ? (
