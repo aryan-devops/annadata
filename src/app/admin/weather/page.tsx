@@ -236,9 +236,9 @@ export default function AdminWeatherPage() {
                 <FormField control={form.control} name="recommendedActions" render={({ field }) => (<FormItem><FormLabel>Recommended Actions</FormLabel><FormControl><Textarea placeholder="e.g., Delay irrigation..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <p className="text-sm text-muted-foreground pt-2">Set one or more thresholds to trigger this alert. Leave fields blank to ignore them.</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <FormField control={form.control} name="thresholdRain" render={({ field }) => (<FormItem><FormLabel>Rain > (mm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 50" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="thresholdWind" render={({ field }) => (<FormItem><FormLabel>Wind > (km/h)</FormLabel><FormControl><Input type="number" placeholder="e.g., 30" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="thresholdHumidity" render={({ field }) => (<FormItem><FormLabel>Humidity > (%)</FormLabel><FormControl><Input type="number" placeholder="e.g., 85" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="thresholdRain" render={({ field }) => (<FormItem><FormLabel>Rain &gt; (mm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 50" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="thresholdWind" render={({ field }) => (<FormItem><FormLabel>Wind &gt; (km/h)</FormLabel><FormControl><Input type="number" placeholder="e.g., 30" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="thresholdHumidity" render={({ field }) => (<FormItem><FormLabel>Humidity &gt; (%)</FormLabel><FormControl><Input type="number" placeholder="e.g., 85" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <FormField control={form.control} name="thresholdTemperatureMin" render={({ field }) => (<FormItem><FormLabel>Temp &lt; (°C)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} /></FormControl><FormMessage /></FormItem>)} />
