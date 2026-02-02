@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -95,7 +96,7 @@ export default {
             height: '0',
           },
         },
-        'sprout-bounce': {
+        'logo-bounce': {
           '0%, 100%': {
             transform: 'scale(1) translateY(0)',
             animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
@@ -119,7 +120,7 @@ export default {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'sprout-bounce': 'sprout-bounce 1.5s ease-in-out infinite',
+        'logo-bounce': 'logo-bounce 1.5s ease-in-out infinite',
         'fade-in-up': 'fade-in-up 0.8s ease-out 0.5s forwards',
       },
     },

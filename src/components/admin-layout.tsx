@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { usePathname, redirect } from 'next/navigation';
 import { useUser, useAuth } from '@/firebase';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarContent, SidebarHeader, SidebarInset, SidebarFooter, SidebarSeparator } from '@/components/ui/sidebar';
-import { Sprout, Home, Tractor, Droplets, Wheat, BookOpen, LogOut } from 'lucide-react';
+import { Leaf, Home, Tractor, Droplets, Wheat, BookOpen, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { Header } from './header';
 import Preloader from './preloader';
@@ -54,7 +54,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Sidebar>
                 <SidebarHeader>
                     <div className="flex items-center gap-2 p-2">
-                         <Sprout className="h-6 w-6 text-primary" />
+                         <Leaf className="h-6 w-6 text-primary" />
                          <span className="font-bold text-lg">Admin Panel</span>
                     </div>
                 </SidebarHeader>

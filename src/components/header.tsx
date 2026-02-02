@@ -2,7 +2,7 @@
 'use client';
     
 import Link from 'next/link';
-import { Sprout, Shield, LogOut } from 'lucide-react';
+import { Leaf, Shield, LogOut } from 'lucide-react';
 import { LanguageSwitcher } from './language-switcher';
 import { Button } from './ui/button';
 import { usePathname } from 'next/navigation';
@@ -27,7 +27,7 @@ export function Header() {
       <div className="container flex h-14 max-w-screen-2xl items-center">
         <div className="mr-4 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Sprout className="h-6 w-6 text-primary" />
+            <Leaf className="h-6 w-6 text-primary" />
             <span className="font-bold sm:inline-block">
               Annadata
             </span>

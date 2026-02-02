@@ -1,6 +1,7 @@
+
 'use client';
 
-import { Sprout } from 'lucide-react';
+import { Leaf } from 'lucide-react';
 
 export default function Preloader() {
   return (
@@ -10,8 +11,8 @@ export default function Preloader() {
       <div className="relative flex items-center justify-center">
         <div className="absolute h-24 w-24 rounded-full bg-primary/10 animate-pulse"></div>
         <div className="absolute h-40 w-40 rounded-full bg-primary/5 animate-pulse delay-75"></div>
-        <div className="animate-sprout-bounce">
-            <Sprout className="h-16 w-16 text-primary" />
+        <div className="animate-logo-bounce">
+            <Leaf className="h-16 w-16 text-primary" />
         </div>
       </div>
       <div className="mt-8 flex flex-col items-center gap-2 text-center animate-fade-in-up">
