@@ -28,7 +28,7 @@ const socialLinks = [
 export default function Footer() {
   return (
     <footer className="bg-background border-t border-border/40">
-      <div className="container mx-auto flex flex-col items-center justify-between gap-4 py-6 sm:flex-row">
+      <div className="container mx-auto flex flex-col items-center justify-center gap-4 py-6">
         <p className="text-sm text-muted-foreground">
           Created by <span className="font-bold">Aryan Pandey</span>
         </p>
