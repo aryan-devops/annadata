@@ -68,7 +68,7 @@ export default function CropPage() {
     }
 
     const keyInfo = [
-        { key: 'soilTypes', label: { en: 'Soil Types', hi: 'मिट्टी के प्रकार' }, value: crop.soilTypes.join(', ') },
+        { key: 'soilTypes', label: { en: 'Soil Types', hi: 'मिट्टी के प्रकार' }, value: (crop.soilTypes || []).join(', ') },
         { key: 'temperature', label: { en: 'Ideal Temperature', hi: 'आदर्श तापमान' }, value: crop.idealTemperature },
         { key: 'rainfall', label: { en: 'Ideal Rainfall', hi: 'आदर्श वर्षा' }, value: crop.idealRainfall },
         { key: 'yieldPerAcre', label: { en: 'Yield/Acre', hi: 'उपज/एकड़' }, value: `${crop.expectedYield}` },
@@ -84,5 +84,3 @@ export default function CropPage() {
         />
     );
 }
-
-    

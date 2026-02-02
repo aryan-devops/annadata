@@ -38,7 +38,7 @@ export default function CropCard({ crop }: CropCardProps) {
       <CardContent className="flex-grow p-4">
         <CardTitle className="mb-2 text-xl font-bold font-headline">{cropName}</CardTitle>
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">{t(translations.soil)}:</span> {crop.soilTypes.join(', ')}
+          <span className="font-semibold">{t(translations.soil)}:</span> {(crop.soilTypes || []).join(', ')}
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
@@ -52,5 +52,3 @@ export default function CropCard({ crop }: CropCardProps) {
     </Card>
   );
 }
-
-    
