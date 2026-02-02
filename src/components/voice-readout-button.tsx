@@ -62,22 +62,34 @@ export default function VoiceReadoutButton({ textToRead }: VoiceReadoutButtonPro
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(textToRead);
       utterance.lang = langToLocale[language] || 'en-US';
-
-      // Find a female voice
-      const femaleVoices = voices.filter(
-        (voice) => voice.lang.startsWith(language) && /female/i.test(voice.name)
-      );
       
-      let voiceToUse = femaleVoices[0];
+      // For a "sweeter" voice, we can slightly increase the pitch and slow down the rate.
+      utterance.pitch = 1.1; 
+      utterance.rate = 0.9;
 
+      let voiceToUse: SpeechSynthesisVoice | undefined;
+      const langPrefix = language;
+
+      // 1. Get all female voices for the current language.
+      const femaleVoices = voices.filter(
+        (voice) => voice.lang.startsWith(langPrefix) && /female/i.test(voice.name)
+      );
+
+      // 2. Prioritize "Google" voices as they are often higher quality.
+      voiceToUse = femaleVoices.find(v => /google/i.test(v.name));
+
+      // 3. If no Google voice, take the first available female voice.
       if (!voiceToUse) {
-        // Fallback to any voice for the language that is not explicitly male
-         const otherVoices = voices.filter(
-            (voice) => voice.lang.startsWith(language) && !/male/i.test(voice.name)
-         );
-         voiceToUse = otherVoices[0];
+        voiceToUse = femaleVoices[0];
       }
       
+      // 4. If still no voice, fallback to any voice that isn't explicitly male.
+      if (!voiceToUse) {
+         voiceToUse = voices.find(
+            (voice) => voice.lang.startsWith(langPrefix) && !/male/i.test(voice.name)
+         );
+      }
+
       if(voiceToUse) {
         utterance.voice = voiceToUse;
       }
