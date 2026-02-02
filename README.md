@@ -26,7 +26,6 @@ Annadata AI is an intelligent, modern farming assistant designed to empower Indi
 - **Database**: [Cloud Firestore](https://firebase.google.com/products/firestore)
 - **Authentication**: [Firebase Authentication](https://firebase.google.com/products/auth)
 - **Hosting**: [Firebase App Hosting](https://firebase.google.com/products/app-hosting)
-- **AI**: [Genkit](https://firebase.google.com/docs/genkit) (scaffolding in place)
 
 ## Getting Started
 
