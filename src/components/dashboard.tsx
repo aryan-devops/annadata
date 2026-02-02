@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { locationData, statesList } from '@/lib/location-data';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getWeatherData } from '@/app/actions';
 
 const translations = {
   location: { en: 'Your Location', hi: 'आपका स्थान' },
@@ -240,27 +241,6 @@ export default function Dashboard() {
 
   }, [farmingTips, weather]);
 
-  const seasonMessage = useMemo(() => {
-    if (!currentSeasonInfo || !weather?.location?.region || !crops || !states) return '';
-    const seasonName = currentSeasonInfo.name;
-    const stateName = weather.location.region;
-    
-    const currentState = states.find(s => s.name === stateName);
-    if (!currentState) return t(translations.seasonInfo).replace('{season}', seasonName).replace('{state}', stateName);
-
-    const suitableCrops = crops
-        .filter(c => c.suitableSeasonIds.includes(currentSeasonInfo.id) && c.supportedStateIds.includes(currentState.id))
-        .map(c => c.nameEnglish)
-        .slice(0, 2)
-        .join(' and ');
-
-    if (suitableCrops) {
-        return t(translations.seasonSuitability).replace('{season}', seasonName).replace('{crops}', suitableCrops);
-    }
-    
-    return t(translations.seasonInfo).replace('{season}', seasonName).replace('{state}', stateName);
-  }, [currentSeasonInfo, weather, crops, states, t]);
-
   const dailyTipText = dynamicTip?.tipText || t({
       en: "Check soil moisture before irrigating your crops to avoid overwatering.",
       hi: "पानी की अधिकता से बचने के लिए अपनी फसलों की सिंचाई करने से पहले मिट्टी की नमी की जाँच करें।",
@@ -318,29 +298,13 @@ export default function Dashboard() {
         setIsFetchingWeather(true);
         setWeatherError(null);
         setWeather(null);
-        try {
-          const apiKey = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
-          if (!apiKey) {
-            setWeatherError("Weather API key is not configured.");
-            return;
-          }
-          const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${location}&days=7&aqi=no&alerts=no`);
-          if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData?.error?.message || 'Failed to fetch weather data.');
-          }
-          const data = await res.json();
-          setWeather(data);
-        } catch (error) {
-          console.error(error);
-          if (error instanceof Error) {
-            setWeatherError(error.message);
-          } else {
-            setWeatherError('An unknown error occurred.');
-          }
-        } finally {
-          setIsFetchingWeather(false);
+        const result = await getWeatherData(location);
+        if (result.success) {
+          setWeather(result.data);
+        } else {
+          setWeatherError(result.error);
         }
+        setIsFetchingWeather(false);
       };
       fetchWeather();
     }
@@ -377,18 +341,6 @@ export default function Dashboard() {
           )
       ) : (
         <Skeleton className="h-20 w-full" />
-      )}
-
-      {/* Seasonal Outlook Card */}
-      {seasonMessage && (
-        <Card>
-            <CardHeader>
-                <CardTitle>{t(translations.seasonalOutlook)}</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p>{seasonMessage}</p>
-            </CardContent>
-        </Card>
       )}
 
       {/* Location Section */}
