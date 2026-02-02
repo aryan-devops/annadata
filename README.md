@@ -1,8 +1,8 @@
-# Annadata AI: Smart Farming Assistant
+# Annadata: Smart Farming Assistant
 
 **Created by Aryan | Powered by Firebase**
 
-Annadata AI is an intelligent, modern farming assistant designed to empower Indian farmers with actionable, data-driven insights. This Next.js application provides personalized crop recommendations, real-time weather alerts and forecasts, and dynamic agricultural guidance in multiple languages.
+Annadata is an intelligent, modern farming assistant designed to empower Indian farmers with actionable, data-driven insights. This Next.js application provides personalized crop recommendations, real-time weather alerts and forecasts, and dynamic agricultural guidance in multiple languages.
 
 ## Key Features
 
@@ -41,7 +41,7 @@ To get a local copy up and running, follow these simple steps.
 1.  **Clone the repository:**
     ```sh
     git clone <your-repository-url>
-    cd annadata-ai
+    cd annadata
     ```
 
 2.  **Install NPM packages:**

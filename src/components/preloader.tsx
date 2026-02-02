@@ -15,7 +15,7 @@ export default function Preloader() {
         </div>
       </div>
       <div className="mt-8 flex flex-col items-center gap-2 text-center animate-fade-in-up">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Annadata AI</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Annadata</h1>
         <p className="text-muted-foreground">Loading your smart farming dashboard...</p>
       </div>
     </div>

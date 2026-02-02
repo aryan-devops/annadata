@@ -17,8 +17,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>Annadata AI v2.0</title>
-        <meta name="description" content="AI-powered farming assistant for Indian farmers" />
+        <title>Annadata</title>
+        <meta name="description" content="A smart farming assistant for Indian farmers" />
       </head>
       <body className={cn("font-sans antialiased", inter.variable)}>
         <FirebaseClientProvider>
