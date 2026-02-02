@@ -153,16 +153,30 @@ export default function Dashboard() {
     const { temp_c, precip_mm, wind_kph, humidity } = weather.current;
     
     return weatherAlerts.filter(alert => {
-      if (!alert.isEnabled) return false;
-      
-      if (alert.frostRisk && temp_c <= 4) return true;
-      if (alert.thresholdTemperatureMax != null && temp_c > alert.thresholdTemperatureMax) return true;
-      if (alert.thresholdTemperatureMin != null && temp_c < alert.thresholdTemperatureMin) return true;
-      if (alert.thresholdRain != null && precip_mm > alert.thresholdRain) return true;
-      if (alert.thresholdWind != null && wind_kph > alert.thresholdWind) return true;
-      if (alert.thresholdHumidity != null && humidity > alert.thresholdHumidity) return true;
+        if (!alert.isEnabled) {
+            return false;
+        }
 
-      return false;
+        // An array to hold the evaluation of each condition defined on the alert.
+        const evaluations: (boolean | null)[] = [
+            (alert.frostRisk === true) ? (temp_c <= 4) : null,
+            (alert.thresholdTemperatureMax != null) ? (temp_c > alert.thresholdTemperatureMax) : null,
+            (alert.thresholdTemperatureMin != null) ? (temp_c < alert.thresholdTemperatureMin) : null,
+            (alert.thresholdRain != null) ? (precip_mm > alert.thresholdRain) : null,
+            (alert.thresholdWind != null) ? (wind_kph > alert.thresholdWind) : null,
+            (alert.thresholdHumidity != null) ? (humidity > alert.thresholdHumidity) : null,
+        ];
+        
+        // Filter out the nulls to get only the conditions that are actually defined for this alert.
+        const definedConditions = evaluations.filter(result => result !== null);
+
+        // If no conditions are defined on this alert, it should not trigger.
+        if (definedConditions.length === 0) {
+            return false;
+        }
+        
+        // For the alert to trigger, ALL of its defined conditions must be true.
+        return definedConditions.every(result => result === true);
     });
   }, [weather, weatherAlerts]);
 
