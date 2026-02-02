@@ -31,6 +31,7 @@ export default function CropDetailsClient({ crop, cropLifecycle, keyInfo, iconMa
     const { t, language } = useLanguage();
 
     const cropName = language === 'hi' && crop.nameLocal ? crop.nameLocal : crop.nameEnglish;
+    const imageUrl = crop.imageUrl || 'https://picsum.photos/seed/generic-detail/1200/800';
 
     const lifecycleTranslations = {
         sowingGuide: { en: 'Sowing Guide', hi: 'बुवाई गाइड' },
@@ -50,14 +51,9 @@ export default function CropDetailsClient({ crop, cropLifecycle, keyInfo, iconMa
     return (
         <div className="container mx-auto px-4 py-8">
             <header className="mb-8">
-                {/*
-                  FIX: The parent div has `relative` and a fixed height `h-64`.
-                  The inline style for object-fit has been replaced with the `object-cover` Tailwind class.
-                  This creates a robust container for the hero image.
-                */}
                 <div className="relative mb-4 h-64 w-full overflow-hidden rounded-lg shadow-lg">
                     <Image
-                        src={crop.imageUrl}
+                        src={imageUrl}
                         alt={cropName}
                         fill
                         className="object-cover"

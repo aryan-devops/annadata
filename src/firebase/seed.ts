@@ -23,6 +23,8 @@ export function seedDatabase(firestore: Firestore) {
         const cropsCollectionRef = collection(firestore, 'crops');
         crops.forEach(crop => {
             const docRef = doc(cropsCollectionRef, crop.id);
+            // This will update all fields EXCEPT imageUrl, preserving user uploads.
+            // If the document is new, it will be created with the default imageUrl from seed-data.
             setDocumentNonBlocking(docRef, crop, { merge: true });
         });
 

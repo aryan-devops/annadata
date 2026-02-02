@@ -20,18 +20,14 @@ export default function CropCard({ crop }: CropCardProps) {
   const { language, t } = useLanguage();
   
   const cropName = language === 'hi' && crop.nameLocal ? crop.nameLocal : crop.nameEnglish;
+  const imageUrl = crop.imageUrl || 'https://picsum.photos/seed/generic-crop/600/400';
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg">
       <CardHeader className="p-0">
-        {/*
-          FIX: The parent div now has `relative` and a fixed height `h-48`.
-          This creates a stable container for the `next/image` component with `fill` to occupy.
-          The `sizes` prop is added for performance optimization.
-        */}
         <div className="relative h-48 w-full">
           <Image
-            src={crop.imageUrl}
+            src={imageUrl}
             alt={cropName}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

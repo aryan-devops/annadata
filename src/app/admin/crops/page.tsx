@@ -137,12 +137,14 @@ export default function AdminCropsPage() {
 
   const handleEdit = (crop: any) => {
     setSelectedCrop(crop);
+    const defaultImageUrl = 'https://picsum.photos/seed/placeholder/600/400';
     form.reset({
       ...crop,
+      imageUrl: crop.imageUrl || defaultImageUrl,
       supportedStateIds: crop.supportedStateIds.join(', '),
       suitableSeasonIds: crop.suitableSeasonIds.join(', '),
     });
-    setImagePreview(crop.imageUrl);
+    setImagePreview(crop.imageUrl || defaultImageUrl);
     setIsFormOpen(true);
   };
 
@@ -366,5 +368,3 @@ export default function AdminCropsPage() {
     </>
   );
 }
-
-    

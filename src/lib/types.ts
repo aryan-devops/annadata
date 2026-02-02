@@ -8,7 +8,7 @@ export interface Crop {
   id: string;
   nameEnglish: string;
   nameLocal: string;
-  imageUrl: string;
+  imageUrl?: string;
   supportedStateIds: string[];
   suitableSeasonIds: string[];
   soilType: string;
