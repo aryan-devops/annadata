@@ -1,11 +1,11 @@
-
 'use client';
 
 import { useEffect } from 'react';
 import { usePathname, redirect } from 'next/navigation';
 import { useUser, useAuth } from '@/firebase';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarContent, SidebarHeader, SidebarInset, SidebarFooter, SidebarSeparator } from '@/components/ui/sidebar';
-import { Leaf, Home, Tractor, Droplets, Wheat, BookOpen, LogOut } from 'lucide-react';
+import { Home, Tractor, Droplets, Wheat, BookOpen, LogOut } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from './header';
 import Preloader from './preloader';
@@ -54,7 +54,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Sidebar>
                 <SidebarHeader>
                     <div className="flex items-center gap-2 p-2">
-                         <Leaf className="h-6 w-6 text-primary" />
+                         <Image src="/favicon.ico" alt="Annadata Logo" width={24} height={24} />
                          <span className="font-bold text-lg">Admin Panel</span>
                     </div>
                 </SidebarHeader>

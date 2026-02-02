@@ -19,6 +19,7 @@ export default function RootLayout({
       <head>
         <title>Annadata</title>
         <meta name="description" content="A smart farming assistant for Indian farmers" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className={cn("font-sans antialiased", inter.variable)}>
         <FirebaseClientProvider>
