@@ -31,7 +31,7 @@ const formSchema = z.object({
   imageUrl: z.string().min(1, 'An image is required.'),
   supportedStateIds: z.string().min(1, 'Enter comma-separated state IDs'),
   suitableSeasonIds: z.string().min(1, 'Enter comma-separated season IDs'),
-  soilType: z.string().min(1, 'Soil type is required'),
+  soilTypes: z.string().min(1, 'Enter comma-separated soil types'),
   idealTemperature: z.string().min(1, 'Ideal temperature is required'),
   idealRainfall: z.string().min(1, 'Ideal rainfall is required'),
   expectedYield: z.coerce.number().positive('Must be a positive number'),
@@ -124,7 +124,7 @@ export default function AdminCropsPage() {
       imageUrl: defaultImageUrl,
       supportedStateIds: '',
       suitableSeasonIds: '',
-      soilType: '',
+      soilTypes: '',
       idealTemperature: '',
       idealRainfall: '',
       expectedYield: 1,
@@ -143,6 +143,7 @@ export default function AdminCropsPage() {
       imageUrl: crop.imageUrl || defaultImageUrl,
       supportedStateIds: crop.supportedStateIds.join(', '),
       suitableSeasonIds: crop.suitableSeasonIds.join(', '),
+      soilTypes: crop.soilTypes.join(', '),
     });
     setImagePreview(crop.imageUrl || defaultImageUrl);
     setIsFormOpen(true);
@@ -169,6 +170,7 @@ export default function AdminCropsPage() {
       ...values,
       supportedStateIds: values.supportedStateIds.split(',').map(s => s.trim()),
       suitableSeasonIds: values.suitableSeasonIds.split(',').map(s => s.trim()),
+      soilTypes: values.soilTypes.split(',').map(s => s.trim()),
     };
 
     if (selectedCrop) {
@@ -219,7 +221,7 @@ export default function AdminCropsPage() {
                   <TableRow>
                     <TableHead>English Name</TableHead>
                     <TableHead className="hidden md:table-cell">Local Name</TableHead>
-                    <TableHead className="hidden lg:table-cell">Soil Type</TableHead>
+                    <TableHead className="hidden lg:table-cell">Soil Types</TableHead>
                     <TableHead>Visible</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -229,7 +231,7 @@ export default function AdminCropsPage() {
                     <TableRow key={crop.id}>
                       <TableCell className="font-medium">{crop.nameEnglish}</TableCell>
                       <TableCell className="hidden md:table-cell">{crop.nameLocal}</TableCell>
-                      <TableCell className="hidden lg:table-cell">{crop.soilType}</TableCell>
+                      <TableCell className="hidden lg:table-cell">{crop.soilTypes.join(', ')}</TableCell>
                       <TableCell>
                         <Badge variant={crop.isVisible ? 'default' : 'secondary'}>
                           {crop.isVisible ? 'Yes' : 'No'}
@@ -314,7 +316,7 @@ export default function AdminCropsPage() {
                     <FormField control={form.control} name="suitableSeasonIds" render={({ field }) => (<FormItem><FormLabel>Suitable Seasons (IDs)</FormLabel><FormControl><Input placeholder="e.g., kharif, rabi" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                     <FormField control={form.control} name="soilType" render={({ field }) => (<FormItem><FormLabel>Soil Type</FormLabel><FormControl><Input placeholder="e.g., Loamy" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                     <FormField control={form.control} name="soilTypes" render={({ field }) => (<FormItem><FormLabel>Soil Types</FormLabel><FormControl><Input placeholder="e.g., Loamy, Clay" {...field} /></FormControl><FormMessage /></FormItem>)} />
                      <FormField control={form.control} name="idealTemperature" render={({ field }) => (<FormItem><FormLabel>Ideal Temperature</FormLabel><FormControl><Input placeholder="e.g., 15-25°C" {...field} /></FormControl><FormMessage /></FormItem>)} />
                      <FormField control={form.control} name="idealRainfall" render={({ field }) => (<FormItem><FormLabel>Ideal Rainfall</FormLabel><FormControl><Input placeholder="e.g., 50-90 cm" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
@@ -368,3 +370,5 @@ export default function AdminCropsPage() {
     </>
   );
 }
+
+    

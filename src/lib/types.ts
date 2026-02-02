@@ -11,7 +11,7 @@ export interface Crop {
   imageUrl?: string;
   supportedStateIds: string[];
   suitableSeasonIds: string[];
-  soilType: string;
+  soilTypes: string[];
   idealTemperature: string;
   idealRainfall: string;
   expectedYield: number;
@@ -66,3 +66,5 @@ export interface Season {
   startDate: string; // ISO string
   endDate: string; // ISO string
 }
+
+    

@@ -49,7 +49,7 @@ export default function CropDetailsClient({ crop, cropLifecycle, keyInfo, iconMa
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 animate-fade-in">
             <header className="mb-8">
                 <div className="relative mb-4 h-64 w-full overflow-hidden rounded-lg shadow-lg">
                     <Image
@@ -69,7 +69,7 @@ export default function CropDetailsClient({ crop, cropLifecycle, keyInfo, iconMa
 
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                 <div className="lg:col-span-1">
-                    <Card>
+                    <Card className="opacity-0 animate-fade-in-up" style={{animationDelay: '100ms'}}>
                         <CardHeader>
                             <CardTitle>{t({ en: 'Key Information', hi: 'मुख्य जानकारी' })}</CardTitle>
                         </CardHeader>
@@ -90,7 +90,7 @@ export default function CropDetailsClient({ crop, cropLifecycle, keyInfo, iconMa
                 </div>
 
                 <div className="lg:col-span-2">
-                    <Card>
+                    <Card className="opacity-0 animate-fade-in-up" style={{animationDelay: '200ms'}}>
                         <CardHeader>
                             <CardTitle>{t({ en: 'Complete Crop Guide', hi: 'संपूर्ण फसल गाइड' })}</CardTitle>
                         </CardHeader>
@@ -168,3 +168,5 @@ export default function CropDetailsClient({ crop, cropLifecycle, keyInfo, iconMa
         </div>
     );
 }
+
+    

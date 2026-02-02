@@ -1,9 +1,9 @@
 'use client';
-import { collection, doc, Firestore } from 'firebase/firestore';
-import { setDocumentNonBlocking } from './non-blocking-updates';
+import { collection, doc, Firestore, getDoc } from 'firebase/firestore';
+import { setDocumentNonBlocking, updateDocumentNonBlocking } from './non-blocking-updates';
 import { crops, weatherAlerts, farmingTips, cropLifecycles, states, seasons } from '@/lib/seed-data';
 
-export function seedDatabase(firestore: Firestore) {
+export async function seedDatabase(firestore: Firestore) {
     try {
         // Seed states
         const statesCollectionRef = collection(firestore, 'states');
@@ -19,14 +19,21 @@ export function seedDatabase(firestore: Firestore) {
             setDocumentNonBlocking(docRef, season, { merge: true });
         });
 
-        // Seed crops
+        // Seed crops carefully to preserve existing images
         const cropsCollectionRef = collection(firestore, 'crops');
-        crops.forEach(crop => {
+        for (const crop of crops) {
             const docRef = doc(cropsCollectionRef, crop.id);
-            // This will update all fields EXCEPT imageUrl, preserving user uploads.
-            // If the document is new, it will be created with the default imageUrl from seed-data.
-            setDocumentNonBlocking(docRef, crop, { merge: true });
-        });
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists() && docSnap.data().imageUrl) {
+                // If doc exists and has an image, update details but exclude imageUrl
+                const { imageUrl, ...detailsToUpdate } = crop;
+                updateDocumentNonBlocking(docRef, detailsToUpdate);
+            } else {
+                // If doc is new or has no image, create/update with all data
+                setDocumentNonBlocking(docRef, crop, { merge: true });
+            }
+        }
 
         // Seed weather alerts
         const alertsCollectionRef = collection(firestore, 'weatherAlerts');
@@ -55,3 +62,5 @@ export function seedDatabase(firestore: Firestore) {
         return { success: false, error };
     }
 }
+
+    

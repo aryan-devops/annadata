@@ -57,7 +57,7 @@ const seasonDefinitions = [
     { id: 'zaid', name: 'Zaid', startMonth: 3, endMonth: 4 }, // Apr to May
 ];
 
-const soilTypes = [ 'All', 'Loamy', 'Clayey Loam', 'Red Loam', 'Heavy Loam', 'Black Cotton Soil', 'Sandy Loam', 'Light to Heavy Clay', 'Well-drained Sandy Loam', 'Clay Loam' ];
+const soilTypes = ['All', 'Loamy', 'Clayey Loam', 'Red Loam', 'Heavy Loam', 'Black Cotton Soil', 'Sandy Loam', 'Clay', 'Loamy Sand', 'Well-drained Sandy Loam', 'Light to Heavy Clay'];
 
 function getCurrentSeason() {
     const currentMonth = new Date().getMonth();
@@ -261,8 +261,7 @@ export default function Dashboard() {
     }
 
     if (selectedSoilType && selectedSoilType !== 'All') {
-        const soilRegex = new RegExp(selectedSoilType, 'i');
-        filteredCrops = filteredCrops.filter(crop => soilRegex.test(crop.soilType));
+        filteredCrops = filteredCrops.filter(crop => crop.soilTypes.includes(selectedSoilType));
     }
     
     return filteredCrops;
@@ -328,7 +327,7 @@ export default function Dashboard() {
 
   return (
     <>
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
        {/* Smart Weather Alert Section */}
       {activeAlert ? (
           activeAlert.id === 'normal' ? (
@@ -484,7 +483,11 @@ export default function Dashboard() {
               ) : cropsError ? (
                   <p className="col-span-full text-destructive">Error loading crops.</p>
               ) : recommendedCrops.length > 0 ? (
-                  recommendedCrops.map(crop => <CropCard key={crop.id} crop={crop} />)
+                  recommendedCrops.map((crop, i) => (
+                    <div key={crop.id} className="opacity-0 animate-fade-in-up" style={{ animationDelay: `${i * 100}ms`}}>
+                      <CropCard crop={crop} />
+                    </div>
+                  ))
               ) : (
                  <div className="col-span-full text-center text-muted-foreground py-16">
                     <p>No recommended crops found for the selected criteria this season.</p>
@@ -543,3 +546,5 @@ export default function Dashboard() {
     </>
   );
 }
+
+    

@@ -19,7 +19,7 @@ import CropDetailsClient from '@/components/crop-details-client';
 import type { Crop, CropLifecycle } from '@/lib/types';
 
 const iconMap = {
-    soilType: <GitBranch className="h-5 w-5 text-primary" />,
+    soilTypes: <GitBranch className="h-5 w-5 text-primary" />,
     temperature: <Thermometer className="h-5 w-5 text-primary" />,
     rainfall: <CloudDrizzle className="h-5 w-5 text-primary" />,
     yieldPerAcre: <Tractor className="h-5 w-5 text-primary" />,
@@ -68,7 +68,7 @@ export default function CropPage() {
     }
 
     const keyInfo = [
-        { key: 'soilType', label: { en: 'Soil Type', hi: 'मिट्टी का प्रकार' }, value: crop.soilType },
+        { key: 'soilTypes', label: { en: 'Soil Types', hi: 'मिट्टी के प्रकार' }, value: crop.soilTypes.join(', ') },
         { key: 'temperature', label: { en: 'Ideal Temperature', hi: 'आदर्श तापमान' }, value: crop.idealTemperature },
         { key: 'rainfall', label: { en: 'Ideal Rainfall', hi: 'आदर्श वर्षा' }, value: crop.idealRainfall },
         { key: 'yieldPerAcre', label: { en: 'Yield/Acre', hi: 'उपज/एकड़' }, value: `${crop.expectedYield}` },
@@ -84,3 +84,5 @@ export default function CropPage() {
         />
     );
 }
+
+    

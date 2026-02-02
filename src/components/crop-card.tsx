@@ -17,13 +17,13 @@ const translations = {
 };
 
 export default function CropCard({ crop }: CropCardProps) {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   
-  const cropName = language === 'hi' && crop.nameLocal ? crop.nameLocal : crop.nameEnglish;
+  const cropName = crop.nameLocal ? t({ en: crop.nameEnglish, hi: crop.nameLocal }) : crop.nameEnglish;
   const imageUrl = crop.imageUrl || 'https://picsum.photos/seed/generic-crop/600/400';
 
   return (
-    <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg">
+    <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg h-full">
       <CardHeader className="p-0">
         <div className="relative h-48 w-full">
           <Image
@@ -38,7 +38,7 @@ export default function CropCard({ crop }: CropCardProps) {
       <CardContent className="flex-grow p-4">
         <CardTitle className="mb-2 text-xl font-bold font-headline">{cropName}</CardTitle>
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">{t(translations.soil)}:</span> {crop.soilType}
+          <span className="font-semibold">{t(translations.soil)}:</span> {crop.soilTypes.join(', ')}
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
@@ -52,3 +52,5 @@ export default function CropCard({ crop }: CropCardProps) {
     </Card>
   );
 }
+
+    

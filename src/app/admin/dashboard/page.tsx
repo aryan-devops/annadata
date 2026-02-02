@@ -43,13 +43,17 @@ export default function AdminDashboard() {
     const { data: alerts, isLoading: isLoadingAlerts } = useCollection(weatherAlertsCollectionRef);
     const { data: tips, isLoading: isLoadingTips } = useCollection(tipsCollectionRef);
 
-    const handleSeed = () => {
+    const handleSeed = async () => {
         if (firestore) {
-            const result = seedDatabase(firestore);
+            toast({
+                title: "Database Seeding Initiated",
+                description: "This may take a moment. Please wait...",
+            });
+            const result = await seedDatabase(firestore);
             if (result.success) {
                 toast({
-                    title: "Database Seeding Initiated",
-                    description: "Sample data is being added to the database.",
+                    title: "Database Seeding Complete",
+                    description: "Sample data has been successfully added to the database.",
                 });
             } else {
                  toast({
@@ -112,3 +116,5 @@ export default function AdminDashboard() {
         </div>
     );
 }
+
+    

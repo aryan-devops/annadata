@@ -37,9 +37,12 @@
             "type": "string"
           }
         },
-        "soilType": {
-          "type": "string",
-          "description": "Suitable soil type for the crop."
+        "soilTypes": {
+          "type": "array",
+          "description": "Suitable soil types for the crop.",
+          "items": {
+            "type": "string"
+          }
         },
         "idealTemperature": {
           "type": "string",
@@ -69,7 +72,7 @@
         "imageUrl",
         "supportedStateIds",
         "suitableSeasonIds",
-        "soilType",
+        "soilTypes",
         "idealTemperature",
         "idealRainfall",
         "expectedYield",
@@ -540,3 +543,5 @@
     "reasoning": "This Firestore structure is designed for the Smart Crop Advisor Admin Panel, prioritizing Authorization Independence, Clarity, and QAPs. Since authentication is disabled for now, security rules will be permissive during the testing phase but are designed to be easily secured later with minimal changes when authentication is added. The structure leverages structural segregation by separating different data types into distinct collections. Denormalization is applied where necessary to eliminate `get()` calls in security rules when auth is implemented.\n\n**Authorization Independence:** This is achieved by avoiding hierarchical dependencies.  Each top-level collection represents a distinct entity managed by the admin panel. When authentication is implemented, authorization will be based on admin roles (e.g., a collection of admin UIDs) to control access to these collections.\n\n**QAPs (Rules Are Not Filters):** The structure supports secure list operations by segregating data and ensuring that each collection contains documents with uniform security requirements. For example, the `crops` collection stores only crop data managed by admins. There is no need to filter based on user-specific criteria during list operations. When auth is implemented, a simple `allow read: if isAdmin()` rule on each collection will suffice.\n\n**Invariants:** The structure supports invariants such as ownership, timestamps, and denormalized data. While timestamps are not explicitly included in the schema definitions, they can be easily added (e.g., `createdAt`, `updatedAt`) and managed via server timestamps. Denormalization, as described above, maintains data integrity across the board."
   }
 }
+
+    
