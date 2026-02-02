@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -8,6 +9,7 @@ import { Home, Tractor, Droplets, Wheat, BookOpen, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from './header';
+import Footer from './footer';
 import Preloader from './preloader';
 
 const adminNavItems = [
@@ -34,6 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="relative flex min-h-screen w-full flex-col">
                 <Header />
                 <main className="flex-1">{children}</main>
+                <Footer />
             </div>
         )
     }
