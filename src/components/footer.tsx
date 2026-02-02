@@ -28,10 +28,11 @@ const socialLinks = [
 export default function Footer() {
   return (
     <footer className="bg-background border-t border-border/40">
-      <div className="container mx-auto flex flex-col items-center justify-center gap-4 py-6">
+      <div className="container mx-auto flex flex-col items-center justify-center gap-4 py-6 md:flex-row">
         <p className="text-sm text-muted-foreground">
           Created by <span className="font-bold">Aryan Pandey</span>
         </p>
+        <div className="hidden h-4 w-px bg-border md:block" aria-hidden="true" />
         <div className="flex items-center gap-4">
           {socialLinks.map((link) => (
             <Link
