@@ -1,9 +1,5 @@
 export type Language = 'en' | 'hi' | 'mr' | 'ta' | 'te' | 'bn';
 
-export type Translations = {
-  [key: string]: string;
-};
-
 export interface Crop {
   id: string;
   nameEnglish: string;
@@ -66,5 +62,3 @@ export interface Season {
   startDate: string; // ISO string
   endDate: string; // ISO string
 }
-
-    

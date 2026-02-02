@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, type ReactNode } from 'react';
 import Image from 'next/image';
 import { MapPin, ThermometerSun, Wind, Droplets, Lightbulb, CalendarDays, Edit, AlertTriangle, CloudRain, Sun, Snowflake, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import CropCard from './crop-card';
 import VoiceReadoutButton from './voice-readout-button';
-import { useLanguage } from '@/context/language-context';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { collection } from 'firebase/firestore';
 import { useCollection } from '@/firebase/firestore/use-collection';
@@ -19,37 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { locationData, statesList } from '@/lib/location-data';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const translations = {
-  location: { en: 'Your Location', hi: 'आपका स्थान' },
-  detecting: { en: 'Detecting location...', hi: 'स्थान का पता लगाया जा रहा है...' },
-  manualLocation: { en: 'Set Location Manually', hi: 'मैन्युअल रूप से स्थान सेट करें' },
-  changeLocation: { en: 'Change Location', hi: 'स्थान बदलें' },
-  setLocation: { en: 'Set Location', hi: 'स्थान सेट करें' },
-  dailyTip: { en: "Today's Tip", hi: 'आज का सुझाव' },
-  cropRecommendations: { en: 'Crop Recommendations', hi: 'फसल सुझाव' },
-  currentWeather: { en: 'Current Weather', hi: 'वर्तमान मौसम' },
-  feelsLike: { en: 'Feels like', hi: 'जैसा लगता है' },
-  wind: { en: 'Wind', hi: 'हवा' },
-  humidity: { en: 'Humidity', hi: 'नमी' },
-  enterLocationPrompt: { en: 'Enter a location to see the weather.', hi: 'मौसम देखने के लिए एक स्थान दर्ज करें।' },
-  couldNotDetectLocation: { en: 'Your location could not be automatically detected. Please enter it manually.', hi: 'आपके स्थान का स्वचालित रूप से पता नहीं लगाया जा सका। कृपया इसे मैन्युअल रूप से दर्ज करें।' },
-  basedOnSeason: { en: 'Based on the current season', hi: 'वर्तमान मौसम के आधार पर' },
-  filterBySoil: { en: 'Filter by soil type...', hi: 'मिट्टी के प्रकार से फ़िल्टर करें...' },
-  allSoils: { en: 'All Soil Types', hi: 'सभी मिट्टी के प्रकार' },
-
-  // Alert and Season translations
-  normalWeatherTitle: { en: 'Weather is Normal', hi: 'मौसम सामान्य है' },
-  normalWeatherMessage: { en: 'Current and forecast conditions are suitable for normal farming activities.', hi: 'वर्तमान और पूर्वानुमान की स्थितियाँ सामान्य खेती की गतिविधियों के लिए उपयुक्त हैं।' },
-  normalWeatherAdvice: { en: 'You may continue with sowing, irrigation, and routine field work.', hi: 'आप बुवाई, सिंचाई और नियमित खेत के काम के साथ जारी रख सकते हैं।' },
-  
-  drySpellTitle: { en: 'Dry Spell Alert', hi: 'सूखे का अलर्ट' },
-  drySpellAdvice: { en: 'Plan for irrigation and delay fertilizer application as no rain is forecast for the next 7 days.', hi: 'सिंचाई की योजना बनाएं और उर्वरक डालने में देरी करें क्योंकि अगले 7 दिनों तक बारिश का कोई पूर्वानुमान नहीं है।' },
-
-  seasonalOutlook: { en: 'Seasonal Outlook', hi: 'मौसमी दृष्टिकोण' },
-  seasonSuitability: { en: 'This weather is suitable for {season} crops like {crops}.', hi: 'यह मौसम {crops} जैसी {season} फसलों के लिए उपयुक्त है।' },
-  seasonInfo: { en: 'Currently in the {season} season in {state}.', hi: 'वर्तमान में {state} में {season} का मौसम है।'},
-};
+import { DynamicText } from './dynamic-text';
 
 const seasonDefinitions = [
     { id: 'kharif', name: 'Kharif', startMonth: 5, endMonth: 9 }, // June to Oct (0-indexed months)
@@ -120,7 +89,6 @@ export default function Dashboard() {
   const [selectedState, setSelectedState] = useState<string>('');
   const [availableDistricts, setAvailableDistricts] = useState<string[]>([]);
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
-  const { t } = useLanguage();
   const currentSeasonInfo = useMemo(getCurrentSeason, []);
 
   const firestore = useFirestore();
@@ -137,10 +105,9 @@ export default function Dashboard() {
   const activeAlert = useMemo(() => {
     if (!weather?.forecast || !weatherAlerts) return null;
 
-    const triggered = [];
+    const triggered: any[] = [];
     const forecast = weather.forecast.forecastday;
 
-    // Evaluate configurable alerts from Firestore against the forecast
     for (const rule of weatherAlerts) {
         if (!rule.isEnabled) continue;
         
@@ -164,19 +131,19 @@ export default function Dashboard() {
         }
 
         if (isTriggeredThisRule) {
-            let priority = 4; // default low
+            let priority = 4;
             let variant: 'destructive' | 'warning' | 'default' = 'default';
             let icon: React.ElementType = AlertTriangle;
 
             if (rule.frostRisk || (rule.thresholdTemperatureMax && rule.thresholdTemperatureMax >= 40) || rule.thresholdTemperatureMin) {
-                priority = 1; // Critical
+                priority = 1;
                 variant = 'destructive';
                 icon = (rule.frostRisk || rule.thresholdTemperatureMin) ? Snowflake : Sun;
             } else if (rule.thresholdWind) {
-                priority = 2; // High
+                priority = 2;
                 variant = 'warning';
             } else if (rule.thresholdRain) {
-                priority = 3; // Medium
+                priority = 3;
                 icon = CloudRain;
             }
             
@@ -184,14 +151,13 @@ export default function Dashboard() {
         }
     }
 
-    // Evaluate hardcoded Dry Spell alert
     const isDrySpell = forecast.length >= 7 && forecast.every((day:any) => day.day.totalprecip_mm === 0);
     if (isDrySpell) {
         triggered.push({
             id: 'dry-spell',
             priority: 2,
-            alertMessage: t(translations.drySpellTitle),
-            recommendedActions: t(translations.drySpellAdvice),
+            alertMessage: 'Dry Spell Alert',
+            recommendedActions: 'Plan for irrigation and delay fertilizer application as no rain is forecast for the next 7 days.',
             variant: 'warning',
             icon: Sun
         });
@@ -201,9 +167,9 @@ export default function Dashboard() {
         return {
             id: 'normal',
             type: 'Normal',
-            title: t(translations.normalWeatherTitle),
-            message: t(translations.normalWeatherMessage),
-            advice: t(translations.normalWeatherAdvice),
+            title: 'Weather is Normal',
+            message: 'Current and forecast conditions are suitable for normal farming activities.',
+            advice: 'You may continue with sowing, irrigation, and routine field work.',
             variant: 'success',
             icon: CheckCircle2,
         };
@@ -212,7 +178,7 @@ export default function Dashboard() {
     triggered.sort((a, b) => a.priority - b.priority);
     return triggered[0];
 
-  }, [weather, weatherAlerts, t]);
+  }, [weather, weatherAlerts]);
 
   const dynamicTip = useMemo(() => {
     if (!farmingTips || farmingTips.length === 0) return null;
@@ -240,10 +206,7 @@ export default function Dashboard() {
 
   }, [farmingTips, weather]);
 
-  const dailyTipText = dynamicTip?.tipText || t({
-      en: "Check soil moisture before irrigating your crops to avoid overwatering.",
-      hi: "पानी की अधिकता से बचने के लिए अपनी फसलों की सिंचाई करने से पहले मिट्टी की नमी की जाँच करें।",
-  });
+  const dailyTipText = dynamicTip?.tipText || "Check soil moisture before irrigating your crops to avoid overwatering.";
 
   const recommendedCrops = useMemo(() => {
     if (!crops || !currentSeasonInfo || !states) return [];
@@ -333,17 +296,17 @@ export default function Dashboard() {
           activeAlert.id === 'normal' ? (
             <Alert variant="success">
               <activeAlert.icon className="h-4 w-4" />
-              <AlertTitle>{activeAlert.title}</AlertTitle>
+              <AlertTitle><DynamicText english={activeAlert.title} /></AlertTitle>
               <AlertDescription>
-                {activeAlert.message} {activeAlert.advice}
+                <DynamicText english={activeAlert.message} /> <DynamicText english={activeAlert.advice} />
               </AlertDescription>
             </Alert>
           ) : (
             <Alert variant={activeAlert.variant}>
               <activeAlert.icon className="h-4 w-4" />
-              <AlertTitle>{activeAlert.alertMessage}</AlertTitle>
+              <AlertTitle><DynamicText english={activeAlert.alertMessage} /></AlertTitle>
               <AlertDescription>
-                {activeAlert.recommendedActions}
+                <DynamicText english={activeAlert.recommendedActions} />
               </AlertDescription>
             </Alert>
           )
@@ -356,7 +319,7 @@ export default function Dashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="text-primary" />
-            {t(translations.location)}
+            <DynamicText english="Your Location" />
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -369,12 +332,12 @@ export default function Dashboard() {
                 ) : weather ? (
                 <p className="text-lg font-semibold">{weather.location.name}, {weather.location.region}, {weather.location.country}</p>
                 ) : (
-                    <p className="text-muted-foreground">{t(translations.couldNotDetectLocation)}</p>
+                    <p className="text-muted-foreground"><DynamicText english="Your location could not be automatically detected. Please enter it manually." /></p>
                 )}
             </div>
             <Button onClick={() => setIsLocationDialogOpen(true)} variant="outline" className="w-full sm:w-auto flex-shrink-0">
                 <Edit className="mr-2 h-4 w-4" />
-                {weather ? t(translations.changeLocation) : t(translations.manualLocation)}
+                {weather ? <DynamicText english="Change Location" /> : <DynamicText english="Set Location Manually" />}
             </Button>
         </CardContent>
       </Card>
@@ -386,7 +349,7 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lightbulb className="text-accent" />
-                {t(translations.dailyTip)}
+                <DynamicText english="Today's Tip" />
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -396,15 +359,21 @@ export default function Dashboard() {
                       <Skeleton className="h-4 w-3/4" />
                   </div>
               ) : (
-                <p className="mb-4">{dailyTipText}</p>
+                <DynamicText english={dailyTipText}>
+                  {(translated) => (
+                    <>
+                      <p className="mb-4">{translated || dailyTipText}</p>
+                      <VoiceReadoutButton textToRead={translated || dailyTipText} />
+                    </>
+                  )}
+                </DynamicText>
               )}
-              <VoiceReadoutButton textToRead={dailyTipText} />
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader>
-              <CardTitle>{t(translations.currentWeather)}</CardTitle>
+              <CardTitle><DynamicText english="Current Weather" /></CardTitle>
               {weather && <CardDescription>{`${weather.location.name}, ${weather.location.country}`}</CardDescription>}
             </CardHeader>
             <CardContent>
@@ -425,23 +394,23 @@ export default function Dashboard() {
                   <div className="w-full grid grid-cols-3 gap-2 text-sm text-muted-foreground pt-4 border-t">
                       <div className="flex flex-col items-center gap-1">
                           <ThermometerSun className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-xs">{t(translations.feelsLike)}</span>
+                          <span className="text-xs"><DynamicText english="Feels like" /></span>
                           <b className="font-bold text-foreground">{Math.round(weather.current.feelslike_c)}°C</b>
                       </div>
                       <div className="flex flex-col items-center gap-1">
                           <Wind className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-xs">{t(translations.wind)}</span>
+                          <span className="text-xs"><DynamicText english="Wind" /></span>
                           <b className="font-bold text-foreground">{weather.current.wind_kph} km/h</b>
                       </div>
                       <div className="flex flex-col items-center gap-1">
                           <Droplets className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-xs">{t(translations.humidity)}</span>
+                          <span className="text-xs"><DynamicText english="Humidity" /></span>
                           <b className="font-bold text-foreground">{weather.current.humidity}%</b>
                       </div>
                   </div>
                 </div>
               ) : (
-                <p className="py-8 text-center text-muted-foreground">{t(translations.enterLocationPrompt)}</p>
+                <p className="py-8 text-center text-muted-foreground"><DynamicText english="Enter a location to see the weather." /></p>
               )}
             </CardContent>
           </Card>
@@ -453,11 +422,11 @@ export default function Dashboard() {
              <CardHeader>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <CardTitle>{t(translations.cropRecommendations)}</CardTitle>
+                        <CardTitle><DynamicText english="Crop Recommendations" /></CardTitle>
                         {currentSeasonInfo ? (
                                 <CardDescription className="flex items-center gap-2 mt-1">
                                     <CalendarDays className="h-4 w-4" />
-                                    <span>{t(translations.basedOnSeason)}: <span className="font-semibold text-primary">{currentSeasonInfo.name}</span> { weather?.location?.region && <>in <span className="font-semibold text-primary">{weather.location.region}</span></>}</span>
+                                    <span><DynamicText english="Based on the current season" />: <span className="font-semibold text-primary">{currentSeasonInfo.name}</span> { weather?.location?.region && <>in <span className="font-semibold text-primary">{weather.location.region}</span></>}</span>
                                 </CardDescription>
                             ) : (
                                 <CardDescription>Based on your location and current season.</CardDescription>
@@ -466,11 +435,11 @@ export default function Dashboard() {
                      <div className="w-full sm:w-48">
                         <Select value={selectedSoilType} onValueChange={setSelectedSoilType}>
                             <SelectTrigger id="soil-type-filter" className="w-full">
-                                <SelectValue placeholder={t(translations.filterBySoil)} />
+                                <SelectValue placeholder={<DynamicText english="Filter by soil type..." />} />
                             </SelectTrigger>
                             <SelectContent>
                                 {soilTypes.map(soil => (
-                                    <SelectItem key={soil} value={soil}>{soil === 'All' ? t(translations.allSoils) : soil}</SelectItem>
+                                    <SelectItem key={soil} value={soil}>{soil === 'All' ? <DynamicText english="All Soil Types" /> : soil}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -502,14 +471,14 @@ export default function Dashboard() {
     <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Select Your Location</DialogTitle>
+          <DialogTitle><DynamicText english="Select Your Location" /></DialogTitle>
           <DialogDescription>
-            Choose your state and district to get tailored weather and crop recommendations.
+            <DynamicText english="Choose your state and district to get tailored weather and crop recommendations." />
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 gap-4 py-4">
           <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="state-select">State</Label>
+            <Label htmlFor="state-select"><DynamicText english="State" /></Label>
             <Select value={selectedState} onValueChange={setSelectedState}>
               <SelectTrigger id="state-select">
                 <SelectValue placeholder="Select a state" />
@@ -522,7 +491,7 @@ export default function Dashboard() {
             </Select>
           </div>
           <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="district-select">District</Label>
+            <Label htmlFor="district-select"><DynamicText english="District" /></Label>
             <Select value={selectedDistrict} onValueChange={setSelectedDistrict} disabled={!selectedState}>
               <SelectTrigger id="district-select">
                 <SelectValue placeholder="Select a district" />
@@ -536,9 +505,9 @@ export default function Dashboard() {
           </div>
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => setIsLocationDialogOpen(false)}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => setIsLocationDialogOpen(false)}><DynamicText english="Cancel" /></Button>
           <Button type="submit" onClick={handleSetManualLocation} disabled={!selectedDistrict || !selectedState}>
-            {t(translations.setLocation)}
+            <DynamicText english="Set Location" />
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -546,5 +515,3 @@ export default function Dashboard() {
     </>
   );
 }
-
-    

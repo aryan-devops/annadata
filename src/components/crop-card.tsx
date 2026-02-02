@@ -2,24 +2,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Crop } from '@/lib/types';
-import { useLanguage } from '@/context/language-context';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { DynamicText } from './dynamic-text';
 
 interface CropCardProps {
   crop: Crop;
 }
 
-const translations = {
-  viewDetails: { en: 'View Details', hi: 'विवरण देखें', mr: ' तपशील पहा', ta: 'விவரங்களைக் காண்க', te: 'వివరాలను చూడండి', bn: 'বিস্তারিত দেখুন' },
-  soil: { en: 'Soil', hi: 'मिट्टी', mr: 'माती', ta: 'மண்', te: 'నేల', bn: 'মাটি' },
-};
-
 export default function CropCard({ crop }: CropCardProps) {
-  const { t } = useLanguage();
-  
-  const cropName = crop.nameLocal ? t({ en: crop.nameEnglish, hi: crop.nameLocal }) : crop.nameEnglish;
   const imageUrl = crop.imageUrl || 'https://picsum.photos/seed/generic-crop/600/400';
 
   return (
@@ -28,7 +20,7 @@ export default function CropCard({ crop }: CropCardProps) {
         <div className="relative h-48 w-full">
           <Image
             src={imageUrl}
-            alt={cropName}
+            alt={crop.nameEnglish}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover"
@@ -36,15 +28,17 @@ export default function CropCard({ crop }: CropCardProps) {
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-4">
-        <CardTitle className="mb-2 text-xl font-bold font-headline">{cropName}</CardTitle>
+        <CardTitle className="mb-2 text-xl font-bold font-headline">
+          <DynamicText english={crop.nameEnglish} hindi={crop.nameLocal} />
+        </CardTitle>
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">{t(translations.soil)}:</span> {(crop.soilTypes || []).join(', ')}
+          <span className="font-semibold"><DynamicText english="Soil" />:</span> {(crop.soilTypes || []).join(', ')}
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button asChild className="w-full">
           <Link href={`/crops/${crop.id}`}>
-            {t(translations.viewDetails)}
+            <DynamicText english="View Details" />
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
