@@ -196,95 +196,62 @@ export const crops: Crop[] = [
 ];
 
 export const weatherAlerts: WeatherAlert[] = [
-  {
-    id: 'heavy-rain-warning',
-    thresholdRain: 50,
-    thresholdTemperatureMin: 0,
-    thresholdTemperatureMax: 50,
-    frostRisk: false,
-    alertMessage: 'Heavy rainfall expected. Postpone irrigation and protect young seedlings.',
-    recommendedActions: 'Delay irrigation, ensure proper drainage.',
-    isEnabled: true,
-  },
-  {
-    id: 'heatwave-alert',
-    thresholdRain: 100,
-    thresholdTemperatureMin: 0,
-    thresholdTemperatureMax: 40,
-    frostRisk: false,
-    alertMessage: 'Heatwave conditions approaching. Ensure adequate irrigation to prevent crop stress.',
-    recommendedActions: 'Increase irrigation frequency, apply mulch.',
-    isEnabled: true,
-  },
-  {
-    id: 'frost-risk-alert',
-    thresholdRain: 100,
-    thresholdTemperatureMin: 4,
-    thresholdTemperatureMax: 50,
-    frostRisk: true,
-    alertMessage: 'Frost risk overnight. Protect sensitive crops.',
-    recommendedActions: 'Cover crops, use sprinklers to raise temperature.',
-    isEnabled: true,
-  },
-  {
-    id: 'moderate-rain-forecast',
-    thresholdRain: 20,
-    thresholdTemperatureMin: 0,
-    thresholdTemperatureMax: 50,
-    frostRisk: false,
-    alertMessage: 'Moderate rain expected. Plan pesticide spraying accordingly.',
-    recommendedActions: 'Avoid spraying pesticides 24 hours before rain.',
-    isEnabled: true,
-  },
-  {
-    id: 'high-humidity-warning',
-    thresholdRain: 100,
-    thresholdTemperatureMin: 0,
-    thresholdTemperatureMax: 50,
-    frostRisk: false,
-    alertMessage: 'High humidity increases risk of fungal diseases.',
-    recommendedActions: 'Monitor crops for fungal infections, ensure good air circulation.',
-    isEnabled: false,
-  },
+  // Rain
+  { id: 'rain-light', alertMessage: 'Light rain expected.', recommendedActions: 'Check crop leaves for early signs of fungal disease.', isEnabled: true, thresholdRain: 5 },
+  { id: 'rain-moderate', alertMessage: 'Moderate rainfall forecast. Risk of waterlogging in poorly drained fields.', recommendedActions: 'Ensure field drainage is clear. Postpone irrigation.', isEnabled: true, thresholdRain: 15 },
+  { id: 'rain-heavy', alertMessage: 'Heavy rain warning. Protect young seedlings and expect soil erosion.', recommendedActions: 'Reinforce soil bunds. Consider moving vulnerable equipment to higher ground.', isEnabled: true, thresholdRain: 40 },
+  { id: 'rain-continuous', alertMessage: 'Prolonged drizzle can increase fungal risks.', recommendedActions: 'Improve air circulation around plants if possible. Monitor for mildew.', isEnabled: true, thresholdRain: 10 },
+
+  // Temperature
+  { id: 'temp-heatwave', alertMessage: 'Heatwave Alert! High temperatures can cause crop stress and wilting.', recommendedActions: 'Ensure adequate irrigation, especially during midday. Apply light mulch to retain soil moisture.', isEnabled: true, thresholdTemperatureMax: 38 },
+  { id: 'temp-extreme-heat', alertMessage: 'Extreme Heat Warning. Risk of flower and fruit drop.', recommendedActions: 'Consider applying anti-transpirants. Irrigate during cooler parts of the day (early morning/late evening).', isEnabled: true, thresholdTemperatureMax: 42 },
+  { id: 'temp-cool-snap', alertMessage: 'Sudden drop in temperature may slow crop growth.', recommendedActions: 'Monitor soil temperature. Ensure young plants are established.', isEnabled: true, thresholdTemperatureMax: 10 },
+  { id: 'temp-frost', alertMessage: 'Frost risk overnight. Tender crops are vulnerable.', recommendedActions: 'Cover sensitive plants with cloth or plastic sheets overnight. Lightly irrigate soil in the evening.', isEnabled: true, frostRisk: true },
+  { id: 'temp-low-overnight', alertMessage: 'Low overnight temperatures expected.', recommendedActions: 'Ensure greenhouse vents are closed overnight if applicable.', isEnabled: true, thresholdTemperatureMin: 8 },
+
+  // Wind
+  { id: 'wind-strong', alertMessage: 'Strong winds can cause physical damage to tall crops and increase soil moisture loss.', recommendedActions: 'Check and reinforce supports for crops like maize and sugarcane. Consider installing windbreaks.', isEnabled: true, thresholdWind: 30 },
+  { id: 'wind-hot-dry', alertMessage: 'Hot, dry winds will rapidly decrease soil moisture.', recommendedActions: 'Increase irrigation frequency to compensate for high evaporation rates.', isEnabled: true, thresholdTemperatureMax: 35, thresholdWind: 20 },
+
+  // Humidity
+  { id: 'humidity-high-warm', alertMessage: 'High humidity and warm weather increase risk of fungal and bacterial diseases.', recommendedActions: 'Ensure good air circulation between plants. Proactively apply preventative fungicides if necessary.', isEnabled: true, thresholdTemperatureMin: 20, thresholdHumidity: 85 },
+  { id: 'humidity-low-hot', alertMessage: 'Low humidity and high heat increases water demand significantly.', recommendedActions: 'Monitor for signs of wilting. Ensure irrigation systems are working efficiently.', isEnabled: true, thresholdTemperatureMax: 32, thresholdHumidity: 30 },
 ];
 
 export const farmingTips: FarmingTip[] = [
-  {
-    id: 'soil-testing-tip',
-    tipText: 'Start the season right! Test your soil to understand nutrient needs and pH levels for better crop performance.',
-    language: 'en',
-    scheduledDate: new Date().toISOString(),
-    isEnabled: true,
-  },
-  {
-    id: 'crop-rotation-tip',
-    tipText: 'Practice crop rotation to improve soil health, reduce pests, and increase yields. Avoid planting the same family of crops in the same field year after year.',
-    language: 'en',
-    scheduledDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-    isEnabled: true,
-  },
-  {
-    id: 'water-conservation-tip',
-    tipText: 'Use drip irrigation or sprinklers to conserve water and deliver it directly to the crop roots, minimizing evaporation.',
-    language: 'en',
-    scheduledDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-    isEnabled: true,
-  },
-  {
-    id: 'ipm-tip',
-    tipText: 'Adopt Integrated Pest Management (IPM). Use beneficial insects, traps, and resistant varieties before resorting to chemical pesticides.',
-    language: 'en',
-    scheduledDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-    isEnabled: true,
-  },
-  {
-    id: 'harvesting-tip',
-    tipText: 'Harvest your crops at the right time to ensure maximum quality and market value. Check for visual cues of readiness.',
-    language: 'en',
-    scheduledDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
-    isEnabled: false,
-  },
+  // General
+  { id: 'tip-gen-1', tipText: 'Start the season right! Test your soil to understand nutrient needs and pH levels.', language: 'en', category: 'general', isEnabled: true },
+  { id: 'tip-gen-2', tipText: 'Practice crop rotation to improve soil health, reduce pests, and increase yields.', language: 'en', category: 'general', isEnabled: true },
+  { id: 'tip-gen-3', tipText: 'Regularly clean and maintain your farm equipment to ensure it runs efficiently and safely.', language: 'en', category: 'general', isEnabled: true },
+  { id: 'tip-gen-4', tipText: 'Keep detailed farm records. Tracking inputs, yields, and prices helps in making better future decisions.', language: 'en', category: 'general', isEnabled: true },
+  { id: 'tip-gen-5', tipText: 'Introduce beneficial insects like ladybugs to naturally control pest populations.', language: 'en', category: 'general', isEnabled: true },
+
+  // Hot
+  { id: 'tip-hot-1', tipText: 'During hot weather, irrigate in the early morning or late evening to reduce evaporation.', language: 'en', category: 'hot', isEnabled: true },
+  { id: 'tip-hot-2', tipText: 'Apply a layer of mulch (like straw or compost) to keep soil cool and retain moisture.', language: 'en', category: 'hot', isEnabled: true },
+  { id: 'tip-hot-3', tipText: 'Provide shade for sensitive vegetable crops during the hottest part of the day to prevent sun-scald.', language: 'en', category: 'hot', isEnabled: true },
+  { id: 'tip-hot-4', tipText: 'Check crops for signs of heat stress, such as wilting leaves, even when the soil is moist.', language: 'en', category: 'hot', isEnabled: true },
+
+  // Cold
+  { id: 'tip-cold-1', tipText: 'Before a cold snap, ensure soil is moist. Moist soil retains more heat than dry soil.', language: 'en', category: 'cold', isEnabled: true },
+  { id: 'tip-cold-2', tipText: 'Cover tender plants with blankets or frost cloths overnight to protect them from frost damage.', language: 'en', category: 'cold', isEnabled: true },
+  { id: 'tip-cold-3', tipText: 'Delay pruning trees and shrubs until after the last frost to avoid encouraging new growth that can be damaged.', language: 'en', category: 'cold', isEnabled: true },
+
+  // Rainy
+  { id: 'tip-rainy-1', tipText: 'After heavy rain, check for waterlogging and ensure your field drainage systems are clear.', language: 'en', category: 'rainy', isEnabled: true },
+  { id: 'tip-rainy-2', tipText: 'Avoid walking on or working with very wet soil to prevent compaction.', language: 'en', category: 'rainy', isEnabled: true },
+  { id: 'tip-rainy-3', tipText: 'Postpone fertilizer application if heavy rain is forecast to prevent it from washing away.', language: 'en', category: 'rainy', isEnabled: true },
+  { id: 'tip-rainy-4', tipText: 'Keep a close eye on crops after rain for signs of fungal diseases, which thrive in damp conditions.', language: 'en', category: 'rainy', isEnabled: true },
+
+  // Windy
+  { id: 'tip-windy-1', tipText: 'Strong winds can dry out soil quickly. Check soil moisture levels and irrigate if necessary.', language: 'en', category: 'windy', isEnabled: true },
+  { id: 'tip-windy-2', tipText: 'Inspect and reinforce stakes or trellises for tall or climbing plants like tomatoes and beans.', language: 'en', category: 'windy', isEnabled: true },
+  { id: 'tip-windy-3', tipText: 'Consider planting windbreaks (rows of trees or shrubs) to protect your fields from strong winds in the long term.', language: 'en', category: 'windy', isEnabled: true },
+  
+  // Humidity
+  { id: 'tip-humidity-1', tipText: 'High humidity increases the risk of fungal diseases. Ensure good air circulation by spacing plants properly.', language: 'en', category: 'humidity', isEnabled: true },
 ];
+
 
 export const cropLifecycles: CropLifecycle[] = [
     {

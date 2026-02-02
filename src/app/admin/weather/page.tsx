@@ -23,13 +23,18 @@ import { setDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlo
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Preprocess empty strings to undefined for optional number fields
+const emptyStringToUndefined = z.preprocess((val) => (val === "" ? undefined : val), z.coerce.number().optional());
+
 const formSchema = z.object({
   id: z.string().optional(),
   alertMessage: z.string().min(1, 'Alert message is required'),
   recommendedActions: z.string().min(1, 'Recommended actions are required'),
-  thresholdRain: z.coerce.number(),
-  thresholdTemperatureMin: z.coerce.number(),
-  thresholdTemperatureMax: z.coerce.number(),
+  thresholdRain: emptyStringToUndefined,
+  thresholdTemperatureMin: emptyStringToUndefined,
+  thresholdTemperatureMax: emptyStringToUndefined,
+  thresholdWind: emptyStringToUndefined,
+  thresholdHumidity: emptyStringToUndefined,
   frostRisk: z.boolean().default(false),
   isEnabled: z.boolean().default(true),
 });
@@ -68,6 +73,17 @@ function TableSkeleton() {
   )
 }
 
+function getConditionText(alert: any) {
+    const conditions = [];
+    if (alert.frostRisk) conditions.push('Frost Risk');
+    if (alert.thresholdTemperatureMax != null) conditions.push(`Temp > ${alert.thresholdTemperatureMax}°C`);
+    if (alert.thresholdTemperatureMin != null) conditions.push(`Temp < ${alert.thresholdTemperatureMin}°C`);
+    if (alert.thresholdRain != null) conditions.push(`Rain > ${alert.thresholdRain}mm`);
+    if (alert.thresholdWind != null) conditions.push(`Wind > ${alert.thresholdWind}km/h`);
+    if (alert.thresholdHumidity != null) conditions.push(`Humidity > ${alert.thresholdHumidity}%`);
+    return conditions.join(' or ') || 'No condition set';
+}
+
 
 export default function AdminWeatherPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -84,9 +100,6 @@ export default function AdminWeatherPage() {
     defaultValues: {
       frostRisk: false,
       isEnabled: true,
-      thresholdRain: 0,
-      thresholdTemperatureMin: 0,
-      thresholdTemperatureMax: 50,
     },
   });
 
@@ -95,9 +108,6 @@ export default function AdminWeatherPage() {
     form.reset({
       alertMessage: '',
       recommendedActions: '',
-      thresholdRain: 0,
-      thresholdTemperatureMin: 0,
-      thresholdTemperatureMax: 50,
       frostRisk: false,
       isEnabled: true,
     });
@@ -127,17 +137,25 @@ export default function AdminWeatherPage() {
 
   const onSubmit = (values: AlertFormValues) => {
     if (!firestore) return;
+
+    const dataToSave: any = {};
+    // Clean up undefined values so they are removed from Firestore
+    Object.entries(values).forEach(([key, value]) => {
+        if (value !== undefined) {
+            dataToSave[key] = value;
+        }
+    });
     
     if (selectedAlert) {
       // Update
       const docRef = doc(firestore, 'weatherAlerts', selectedAlert.id);
-      updateDocumentNonBlocking(docRef, values);
+      updateDocumentNonBlocking(docRef, dataToSave);
       toast({ title: 'Alert Updated', description: 'The weather alert has been updated.' });
     } else {
       // Create
-      const newId = values.alertMessage.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 20);
+      const newId = `alert-${Date.now()}`;
       const docRef = doc(firestore, 'weatherAlerts', newId);
-      setDocumentNonBlocking(docRef, {...values, id: newId}, { merge: false });
+      setDocumentNonBlocking(docRef, {...dataToSave, id: newId}, { merge: false });
       toast({ title: 'Alert Added', description: 'The new weather alert has been added.' });
     }
     setIsFormOpen(false);
@@ -180,8 +198,8 @@ export default function AdminWeatherPage() {
                   {alerts?.map((alert) => (
                     <TableRow key={alert.id}>
                       <TableCell className="font-medium max-w-sm truncate">{alert.alertMessage}</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {alert.frostRisk ? 'Frost' : `T°: ${alert.thresholdTemperatureMin}-${alert.thresholdTemperatureMax}°C, Rain: ${alert.thresholdRain}mm`}
+                      <TableCell className="hidden md:table-cell text-xs">
+                        {getConditionText(alert)}
                       </TableCell>
                       <TableCell>
                         <Badge variant={alert.isEnabled ? 'default' : 'secondary'}>
@@ -216,13 +234,18 @@ export default function AdminWeatherPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4">
                 <FormField control={form.control} name="alertMessage" render={({ field }) => (<FormItem><FormLabel>Alert Message</FormLabel><FormControl><Textarea placeholder="e.g., Heavy rainfall expected..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="recommendedActions" render={({ field }) => (<FormItem><FormLabel>Recommended Actions</FormLabel><FormControl><Textarea placeholder="e.g., Delay irrigation..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormField control={form.control} name="thresholdRain" render={({ field }) => (<FormItem><FormLabel>Rain Threshold (mm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="thresholdTemperatureMin" render={({ field }) => (<FormItem><FormLabel>Min Temp (°C)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="thresholdTemperatureMax" render={({ field }) => (<FormItem><FormLabel>Max Temp (°C)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <p className="text-sm text-muted-foreground pt-2">Set one or more thresholds to trigger this alert. Leave fields blank to ignore them.</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <FormField control={form.control} name="thresholdRain" render={({ field }) => (<FormItem><FormLabel>Rain > (mm)</FormLabel><FormControl><Input type="number" placeholder="e.g., 50" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="thresholdWind" render={({ field }) => (<FormItem><FormLabel>Wind > (km/h)</FormLabel><FormControl><Input type="number" placeholder="e.g., 30" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="thresholdHumidity" render={({ field }) => (<FormItem><FormLabel>Humidity > (%)</FormLabel><FormControl><Input type="number" placeholder="e.g., 85" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="frostRisk" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50"><FormLabel>Frost Risk</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <FormField control={form.control} name="thresholdTemperatureMin" render={({ field }) => (<FormItem><FormLabel>Temp &lt; (°C)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="thresholdTemperatureMax" render={({ field }) => (<FormItem><FormLabel>Temp &gt; (°C)</FormLabel><FormControl><Input type="number" placeholder="e.g., 40" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <FormField control={form.control} name="frostRisk" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50"><FormLabel>Frost Risk (Temp &lt;= 4°C)</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
                     <FormField control={form.control} name="isEnabled" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50"><FormLabel>Enabled</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
                 </div>
               <DialogFooter className="pt-4 border-t">

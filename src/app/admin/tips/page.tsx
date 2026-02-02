@@ -14,24 +14,23 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { PlusCircle, Edit, Trash2, CalendarIcon } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection, doc } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { setDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+
+const tipCategories = ['general', 'hot', 'cold', 'rainy', 'windy', 'humidity'];
 
 const formSchema = z.object({
   id: z.string().optional(),
   tipText: z.string().min(1, 'Tip text is required'),
   language: z.string().min(2, 'Language code is required').max(5),
-  scheduledDate: z.date({ required_error: 'A date is required.' }),
+  category: z.string().min(1, 'Category is required'),
   isEnabled: z.boolean().default(true),
 });
 
@@ -83,6 +82,7 @@ export default function AdminTipsPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       language: 'en',
+      category: 'general',
       isEnabled: true,
     },
   });
@@ -92,7 +92,7 @@ export default function AdminTipsPage() {
     form.reset({
       tipText: '',
       language: 'en',
-      scheduledDate: new Date(),
+      category: 'general',
       isEnabled: true,
     });
     setIsFormOpen(true);
@@ -100,7 +100,7 @@ export default function AdminTipsPage() {
 
   const handleEdit = (tip: any) => {
     setSelectedTip(tip);
-    form.reset({ ...tip, scheduledDate: new Date(tip.scheduledDate) });
+    form.reset(tip);
     setIsFormOpen(true);
   };
 
@@ -122,10 +122,7 @@ export default function AdminTipsPage() {
   const onSubmit = (values: TipFormValues) => {
     if (!firestore) return;
     
-    const dataToSave = {
-        ...values,
-        scheduledDate: values.scheduledDate.toISOString(),
-    };
+    const dataToSave = { ...values };
 
     if (selectedTip) {
       // Update
@@ -149,7 +146,7 @@ export default function AdminTipsPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Farming Tip Management</CardTitle>
-            <CardDescription>Manage daily farming tips for users.</CardDescription>
+            <CardDescription>Manage weather-based and general farming tips.</CardDescription>
           </div>
           <Button onClick={handleAddNew}>
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -165,16 +162,18 @@ export default function AdminTipsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Tip Text</TableHead>
-                    <TableHead className="hidden md:table-cell">Scheduled Date</TableHead>
+                    <TableHead className="hidden md:table-cell">Category</TableHead>
                     <TableHead>Enabled</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tips?.sort((a, b) => new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime()).map((tip) => (
+                  {tips?.map((tip) => (
                     <TableRow key={tip.id}>
                       <TableCell className="font-medium max-w-md truncate">{tip.tipText}</TableCell>
-                      <TableCell className="hidden md:table-cell">{format(new Date(tip.scheduledDate), 'PPP')}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <Badge variant="secondary">{tip.category}</Badge>
+                      </TableCell>
                       <TableCell>
                         <Badge variant={tip.isEnabled ? 'default' : 'secondary'}>
                           {tip.isEnabled ? 'Yes' : 'No'}
@@ -205,19 +204,21 @@ export default function AdminTipsPage() {
                 <FormField control={form.control} name="tipText" render={({ field }) => (<FormItem><FormLabel>Tip Text</FormLabel><FormControl><Textarea placeholder="e.g., Check soil moisture before irrigating..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="language" render={({ field }) => (<FormItem><FormLabel>Language</FormLabel><FormControl><Input placeholder="e.g., en" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="scheduledDate" render={({ field }) => (
-                        <FormItem className="flex flex-col"><FormLabel>Scheduled Date</FormLabel>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                <FormControl>
-                                    <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{field.value ? format(field.value, "PPP") : <span>Pick a date</span>}</Button>
-                                </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                                </PopoverContent>
-                            </Popover>
-                        <FormMessage /></FormItem>
+                    <FormField control={form.control} name="category" render={({ field }) => (
+                      <FormItem>
+                          <FormLabel>Category</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                  <SelectTrigger>
+                                      <SelectValue placeholder="Select a category" />
+                                  </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                  {tipCategories.map(cat => <SelectItem key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</SelectItem>)}
+                              </SelectContent>
+                          </Select>
+                          <FormMessage />
+                      </FormItem>
                     )} />
                 </div>
                 <FormField control={form.control} name="isEnabled" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50"><FormLabel>Enabled</FormLabel><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />

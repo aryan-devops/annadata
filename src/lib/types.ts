@@ -21,20 +21,23 @@ export interface Crop {
 
 export type WeatherAlert = {
     id: string;
-    thresholdRain: number;
-    thresholdTemperatureMin: number;
-    thresholdTemperatureMax: number;
-    frostRisk: boolean;
     alertMessage: string;
     recommendedActions: string;
     isEnabled: boolean;
+    // Optional thresholds
+    thresholdRain?: number;
+    thresholdTemperatureMin?: number;
+    thresholdTemperatureMax?: number;
+    thresholdWind?: number;
+    thresholdHumidity?: number;
+    frostRisk?: boolean;
 };
 
 export type FarmingTip = {
     id: string;
     tipText: string;
     language: string;
-    scheduledDate: string; // ISO string
+    category: 'general' | 'hot' | 'cold' | 'rainy' | 'windy' | 'humidity';
     isEnabled: boolean;
 };
 

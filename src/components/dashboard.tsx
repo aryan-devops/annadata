@@ -120,28 +120,53 @@ export default function Dashboard() {
   const { data: crops, isLoading: isLoadingCrops, error: cropsError } = useCollection<Crop>(cropsCollectionRef);
   const { data: states } = useCollection<State>(statesCollectionRef);
   const { data: farmingTips, isLoading: isLoadingTips } = useCollection<FarmingTip>(farmingTipsCollectionRef);
-  const { data: weatherAlerts, isLoading: isLoadingAlerts } = useCollection<WeatherAlertType>(weatherAlertsCollectionRef);
+  const { data: weatherAlerts } = useCollection<WeatherAlertType>(weatherAlertsCollectionRef);
 
-  const dailyTip = useMemo(() => {
-    if (!farmingTips) return null;
-    const today = new Date().toDateString();
-    return farmingTips.find(tip => tip.isEnabled && new Date(tip.scheduledDate).toDateString() === today);
-  }, [farmingTips]);
+  const dynamicTip = useMemo(() => {
+    if (!farmingTips || farmingTips.length === 0) return null;
+
+    let possibleTips: FarmingTip[] = [];
+
+    if (weather?.current) {
+        const { temp_c, precip_mm, wind_kph, humidity } = weather.current;
+        
+        if (temp_c > 35) possibleTips.push(...farmingTips.filter(t => t.category === 'hot' && t.isEnabled));
+        if (temp_c < 10) possibleTips.push(...farmingTips.filter(t => t.category === 'cold' && t.isEnabled));
+        if (precip_mm > 5) possibleTips.push(...farmingTips.filter(t => t.category === 'rainy' && t.isEnabled));
+        if (wind_kph > 25) possibleTips.push(...farmingTips.filter(t => t.category === 'windy' && t.isEnabled));
+        if (humidity > 85) possibleTips.push(...farmingTips.filter(t => t.category === 'humidity' && t.isEnabled));
+    }
+    
+    if (possibleTips.length === 0) {
+        possibleTips = farmingTips.filter(t => t.category === 'general' && t.isEnabled);
+    }
+    
+    if (possibleTips.length === 0) return null;
+    
+    const randomIndex = Math.floor(Math.random() * possibleTips.length);
+    return possibleTips[randomIndex];
+
+  }, [farmingTips, weather]);
 
   const triggeredAlerts = useMemo(() => {
     if (!weather || !weatherAlerts) return [];
-    const { temp_c, precip_mm } = weather.current;
+    const { temp_c, precip_mm, wind_kph, humidity } = weather.current;
     
     return weatherAlerts.filter(alert => {
       if (!alert.isEnabled) return false;
+      
       if (alert.frostRisk && temp_c <= 4) return true;
-      if (temp_c < alert.thresholdTemperatureMin || temp_c > alert.thresholdTemperatureMax) return true;
-      if (precip_mm > alert.thresholdRain && alert.thresholdRain > 0) return true;
+      if (alert.thresholdTemperatureMax != null && temp_c > alert.thresholdTemperatureMax) return true;
+      if (alert.thresholdTemperatureMin != null && temp_c < alert.thresholdTemperatureMin) return true;
+      if (alert.thresholdRain != null && precip_mm > alert.thresholdRain) return true;
+      if (alert.thresholdWind != null && wind_kph > alert.thresholdWind) return true;
+      if (alert.thresholdHumidity != null && humidity > alert.thresholdHumidity) return true;
+
       return false;
     });
   }, [weather, weatherAlerts]);
 
-  const dailyTipText = dailyTip?.tipText || t({
+  const dailyTipText = dynamicTip?.tipText || t({
       en: "Check soil moisture before irrigating your crops to avoid overwatering.",
       hi: "पानी की अधिकता से बचने के लिए अपनी फसलों की सिंचाई करने से पहले मिट्टी की नमी की जाँच करें।",
       mr: "जास्त पाणी देणे टाळण्यासाठी आपल्या पिकांना पाणी देण्यापूर्वी जमिनीतील ओलावा तपासा.",
