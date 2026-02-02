@@ -18,6 +18,8 @@ export const states: State[] = [
   { id: 'bihar', name: 'Bihar', climateZone: 'Subtropical' },
   { id: 'odisha', name: 'Odisha', climateZone: 'Tropical' },
   { id: 'assam', name: 'Assam', climateZone: 'Tropical' },
+  { id: 'himachal-pradesh', name: 'Himachal Pradesh', climateZone: 'Temperate' },
+  { id: 'jammu-kashmir', name: 'Jammu and Kashmir', climateZone: 'Temperate' },
 ];
 
 export const seasons: Season[] = [

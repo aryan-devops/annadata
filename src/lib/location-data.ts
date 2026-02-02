@@ -10,6 +10,8 @@ export const locationData: LocationData = {
   "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba"],
   "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar"],
   "Haryana": ["Faridabad", "Gurugram", "Panipat", "Ambala", "Hisar"],
+  "Himachal Pradesh": ["Shimla", "Manali", "Dharamshala", "Kangra"],
+  "Jammu and Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla"],
   "Karnataka": ["Bengaluru", "Mysuru", "Hubli", "Mangaluru", "Belagavi"],
   "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur"],
   "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain"],
@@ -23,4 +25,4 @@ export const locationData: LocationData = {
   "West Bengal": ["Kolkata", "Asansol", "Siliguri", "Durgapur", "Howrah"],
 };
 
-export const statesList = Object.keys(locationData);
+export const statesList = Object.keys(locationData).sort();
