@@ -1,10 +1,11 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCollection } from '@/firebase/firestore/use-collection';
@@ -27,7 +28,7 @@ const formSchema = z.object({
   id: z.string().optional(),
   nameEnglish: z.string().min(1, 'English name is required'),
   nameLocal: z.string().min(1, 'Local name is required'),
-  imageUrl: z.string().url('Must be a valid URL'),
+  imageUrl: z.string().min(1, 'An image is required.'),
   supportedStateIds: z.string().min(1, 'Enter comma-separated state IDs'),
   suitableSeasonIds: z.string().min(1, 'Enter comma-separated season IDs'),
   soilType: z.string().min(1, 'Soil type is required'),
@@ -78,6 +79,8 @@ export default function AdminCropsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState<any | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const firestore = useFirestore();
 
@@ -91,12 +94,34 @@ export default function AdminCropsPage() {
     },
   });
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 1024) { // 1MB size limit
+        toast({
+          variant: "destructive",
+          title: "Image too large",
+          description: "Please upload an image smaller than 1MB.",
+        });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        form.setValue('imageUrl', dataUrl, { shouldValidate: true });
+        setImagePreview(dataUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleAddNew = () => {
     setSelectedCrop(null);
+    const defaultImageUrl = 'https://picsum.photos/seed/placeholder/600/400';
     form.reset({
       nameEnglish: '',
       nameLocal: '',
-      imageUrl: 'https://picsum.photos/seed/placeholder/600/400',
+      imageUrl: defaultImageUrl,
       supportedStateIds: '',
       suitableSeasonIds: '',
       soilType: '',
@@ -106,6 +131,7 @@ export default function AdminCropsPage() {
       approximateMarketPrice: 1,
       isVisible: true,
     });
+    setImagePreview(defaultImageUrl);
     setIsFormOpen(true);
   };
 
@@ -116,6 +142,7 @@ export default function AdminCropsPage() {
       supportedStateIds: crop.supportedStateIds.join(', '),
       suitableSeasonIds: crop.suitableSeasonIds.join(', '),
     });
+    setImagePreview(crop.imageUrl);
     setIsFormOpen(true);
   };
 
@@ -159,6 +186,7 @@ export default function AdminCropsPage() {
     }
     setIsFormOpen(false);
     form.reset();
+    setImagePreview(null);
   };
 
   return (
@@ -226,7 +254,7 @@ export default function AdminCropsPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <Dialog open={isFormOpen} onOpenChange={(isOpen) => { setIsFormOpen(isOpen); if (!isOpen) setImagePreview(null); }}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>{selectedCrop ? 'Edit Crop' : 'Add New Crop'}</DialogTitle>
@@ -235,11 +263,50 @@ export default function AdminCropsPage() {
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <ScrollArea className="max-h-[70vh] p-1">
                 <div className="space-y-4 p-4">
+                    <FormField
+                        control={form.control}
+                        name="imageUrl"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Crop Image</FormLabel>
+                            <FormControl>
+                                <>
+                                <Input
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/png, image/jpeg, image/gif, image/webp"
+                                    ref={fileInputRef}
+                                    onChange={handleImageChange}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Upload Image
+                                </Button>
+                                </>
+                            </FormControl>
+                            {imagePreview && (
+                                <div className="mt-4 relative w-full h-48 rounded-md border overflow-hidden">
+                                <Image 
+                                    src={imagePreview} 
+                                    alt="Crop preview" 
+                                    fill 
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                />
+                                </div>
+                            )}
+                             <FormMessage />
+                            </FormItem>
+                        )}
+                        />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="nameEnglish" render={({ field }) => (<FormItem><FormLabel>English Name</FormLabel><FormControl><Input placeholder="e.g., Wheat" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="nameLocal" render={({ field }) => (<FormItem><FormLabel>Local Name</FormLabel><FormControl><Input placeholder="e.g., गेहूं" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
-                  <FormField control={form.control} name="imageUrl" render={({ field }) => (<FormItem><FormLabel>Image URL</FormLabel><FormControl><Input placeholder="https://example.com/image.jpg" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="supportedStateIds" render={({ field }) => (<FormItem><FormLabel>Supported States (IDs)</FormLabel><FormControl><Input placeholder="e.g., state-1, state-2" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="suitableSeasonIds" render={({ field }) => (<FormItem><FormLabel>Suitable Seasons (IDs)</FormLabel><FormControl><Input placeholder="e.g., kharif, rabi" {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -299,3 +366,5 @@ export default function AdminCropsPage() {
     </>
   );
 }
+
+    
